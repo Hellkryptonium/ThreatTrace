@@ -1,0 +1,26 @@
+From: Security Team <alerts@trusted.example>
+To: Analyst <analyst@example.net>
+Reply-To: recovery@untrusted.example
+Return-Path: <mailer@untrusted.example>
+Subject: Urgent account verification
+Date: Sun, 23 Aug 2026 10:32:11 +0000
+Message-ID: <fixture-threattrace-001@example>
+Received-SPF: FAIL
+Authentication-Results: mx.example.net; spf=fail smtp.mailfrom=untrusted.example; dkim=fail header.d=untrusted.example; dmarc=fail header.from=trusted.example
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="fixture-boundary"
+
+--fixture-boundary
+Content-Type: text/plain; charset="UTF-8"
+
+Your account requires immediate verification.
+Sign in now: http://192.0.2.10/verify
+Backup link: https://bit.ly/fixture-link
+
+--fixture-boundary
+Content-Type: text/plain; name="invoice.txt"
+Content-Disposition: attachment; filename="invoice.txt"
+Content-Transfer-Encoding: base64
+
+VGhpcyBpcyBhIHNhbml0aXplZCBmaXh0dXJlLg==
+--fixture-boundary--
