@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { uploadEmail } from "@/lib/api/emails";
-import { getCurrentUser, type CurrentUser } from "@/lib/api/auth";
+import { getCurrentUser, logoutUser, type CurrentUser } from "@/lib/api/auth";
 
 export default function UploadPage() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -11,6 +11,7 @@ export default function UploadPage() {
   const [state, setState] = useState<"idle" | "uploading" | "error">("idle");
   const [error, setError] = useState("");
   const [user, setUser] = useState<CurrentUser>();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => { getCurrentUser().then(setUser).catch(() => { router.push("/login"); }); }, [router]);
 
@@ -32,9 +33,18 @@ export default function UploadPage() {
     }
   }
 
+  async function handleLogout() {
+    try {
+      await logoutUser();
+      router.push("/login");
+    } catch (err) {
+      console.error("Logout failed", err);
+    }
+  }
+
   return (
     <main className="shell">
-      <header className="topbar"><span className="eyebrow">THREATTRACE <small>/ INTAKE</small></span><span className="top-links"><a href="/emails">Gmail inbox</a><span className="user-label">{user?.name ?? "Checking session..."}</span></span></header>
+      <header className="topbar"><span className="eyebrow">THREATTRACE <small>/ INTAKE</small></span><span className="top-links"><a href="/emails">Gmail inbox</a><div className="dropdown-container"><button className="dropdown-toggle" onClick={() => setDropdownOpen(!dropdownOpen)}>{user?.name ?? "Checking session..."} ▾</button><div className={`dropdown-menu ${dropdownOpen ? 'open' : ''}`}><button onClick={handleLogout} className="dropdown-item">Logout</button></div></div></span></header>
       <section className="intro"><p className="kicker">NEW INVESTIGATION</p><h1>Inspect an email.<br /><em>Follow the evidence.</em></h1><p className="lede">Upload a raw message and ThreatTrace will extract its headers, links, authentication signals, and attachment fingerprints.</p></section>
       <button className={`dropzone ${state}`} onClick={() => inputRef.current?.click()} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); void handleFile(event.dataTransfer.files[0]); }} disabled={state === "uploading"}>
         <span className="upload-mark">↑</span>
