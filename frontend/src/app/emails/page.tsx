@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { getGmailStatus, listGmailMessages, analyzeGmailMessage, gmailConnectUrl, type GmailMessage, type GmailStatus } from "@/lib/api/gmail";
 import { getCurrentUser, logoutUser, type CurrentUser } from "@/lib/api/auth";
@@ -14,6 +14,17 @@ export default function EmailsPage() {
   const [busyId, setBusyId] = useState("");
   const [error, setError] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     Promise.all([getCurrentUser(), getGmailStatus()]).then(([currentUser, gmailStatus]) => {
@@ -39,5 +50,5 @@ export default function EmailsPage() {
     }
   }
 
-  return <main className="shell inbox"><header className="topbar"><span className="eyebrow">THREATTRACE <small>/ INBOX</small></span><div className="dropdown-container"><button className="dropdown-toggle" onClick={() => setDropdownOpen(!dropdownOpen)}>{user?.name} ▾</button><div className={`dropdown-menu ${dropdownOpen ? 'open' : ''}`}><button onClick={handleLogout} className="dropdown-item">Logout</button></div></div></header><section className="inbox-heading"><div><p className="kicker">GMAIL MAILBOX</p><h1>Choose a message<br /><em>to investigate.</em></h1></div>{status?.connected ? <span className="connected">Connected as {status.email}</span> : <a className="connect-button" href={gmailConnectUrl()}>Connect Gmail</a>}</section>{error && <p className="error" role="alert">{error}</p>}{loading ? <p className="muted">Loading your mailbox...</p> : !status?.connected ? <section className="empty"><h2>Gmail is not connected</h2><p>Connect a read-only Gmail account to select messages for analysis.</p></section> : !messages.length ? <section className="empty"><h2>No messages found</h2><p>Your mailbox returned no messages available for investigation.</p></section> : <section className="message-list">{messages.map((message) => <article className="message-row" key={message.id}><div className="message-main"><strong>{message.from ?? "Unknown sender"}</strong><h2>{message.subject}</h2><p>{message.snippet}</p></div><time>{message.date ? new Date(message.date).toLocaleDateString() : ""}</time><button className="analyze-button" onClick={() => void analyze(message)} disabled={busyId === message.id}>{busyId === message.id ? "Analyzing..." : "Analyze"}</button></article>)}</section>}<footer><a href="/analyze/upload">Upload .eml</a><span>GMAIL READ-ONLY / v1</span></footer></main>;
+  return <main className="shell inbox"><header className="topbar"><span className="eyebrow">THREATTRACE <small>/ INBOX</small></span><div className="dropdown-container" ref={dropdownRef}><button className="dropdown-toggle" onClick={() => setDropdownOpen(!dropdownOpen)}>{user?.name} ▾</button><div className={`dropdown-menu ${dropdownOpen ? 'open' : ''}`}><button onClick={handleLogout} className="dropdown-item">Logout</button></div></div></header><section className="inbox-heading"><div><p className="kicker">GMAIL MAILBOX</p><h1>Choose a message<br /><em>to investigate.</em></h1></div>{status?.connected ? <span className="connected">Connected as {status.email}</span> : <a className="connect-button" href={gmailConnectUrl()}>Connect Gmail</a>}</section>{error && <p className="error" role="alert">{error}</p>}{loading ? <p className="muted">Loading your mailbox...</p> : !status?.connected ? <section className="empty"><h2>Gmail is not connected</h2><p>Connect a read-only Gmail account to select messages for analysis.</p></section> : !messages.length ? <section className="empty"><h2>No messages found</h2><p>Your mailbox returned no messages available for investigation.</p></section> : <section className="message-list">{messages.map((message) => <article className="message-row" key={message.id}><div className="message-main"><strong>{message.from ?? "Unknown sender"}</strong><h2>{message.subject}</h2><p>{message.snippet}</p></div><time>{message.date ? new Date(message.date).toLocaleDateString() : ""}</time><button className="analyze-button" onClick={() => void analyze(message)} disabled={busyId === message.id}>{busyId === message.id ? "Analyzing..." : "Analyze"}</button></article>)}</section>}<footer><a href="/analyze/upload">Upload .eml</a><span>GMAIL READ-ONLY / v1</span></footer></main>;
 }
