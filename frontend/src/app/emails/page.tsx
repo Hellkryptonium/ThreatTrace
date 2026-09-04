@@ -21,7 +21,7 @@ export default function EmailsPage() {
       setUser(currentUser);
       setStatus(gmailStatus);
       if (gmailStatus.connected) return listGmailMessages().then(setMessages);
-    }).catch((reason: unknown) => { if (reason instanceof Error && reason.message.includes("Authentication required")) router.push("/login"); else setError(reason instanceof Error ? reason.message : "Gmail could not be loaded."); }).finally(() => setLoading(false));
+    }).catch((reason: unknown) => { if (reason instanceof Error && reason.message.includes("Authentication required")) router.replace("/login"); else setError(reason instanceof Error ? reason.message : "Gmail could not be loaded."); }).finally(() => setLoading(false));
   }, [router]);
 
   async function analyze(message: GmailMessage) {

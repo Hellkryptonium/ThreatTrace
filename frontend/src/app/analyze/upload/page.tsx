@@ -14,7 +14,7 @@ export default function UploadPage() {
   const [error, setError] = useState("");
   const [user, setUser] = useState<CurrentUser>();
 
-  useEffect(() => { getCurrentUser().then(setUser).catch(() => { router.push("/login"); }); }, [router]);
+  useEffect(() => { getCurrentUser().then(setUser).catch(() => { router.replace("/login"); }); }, [router]);
 
   async function handleFile(file?: File) {
     if (!file) return;

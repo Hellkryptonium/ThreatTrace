@@ -22,7 +22,7 @@ export async function saveGmailAccount(userId: string, tokens: { refresh_token?:
     email: profile.email,
     refreshToken: tokens.refresh_token ? encryptSecret(tokens.refresh_token) : existing?.refreshToken,
     scopes: tokens.scope?.split(" ") ?? existing?.scopes ?? [],
-  }, { upsert: true, new: true });
+  }, { upsert: true, returnDocument: 'after' });
 }
 
 async function gmailForUser(userId: string) {

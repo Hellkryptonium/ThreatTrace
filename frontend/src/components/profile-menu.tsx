@@ -24,7 +24,7 @@ export function ProfileMenu({ user }: ProfileMenuProps) {
 
   async function handleLogout() {
     setLoggingOut(true);
-    try { await logout(); router.push("/login"); }
+    try { await logout(); router.replace("/login"); }
     catch { setLoggingOut(false); }
   }
 

@@ -17,7 +17,7 @@ export async function completeGoogleLogin(request: Request, response: Response) 
   const ticket = await googleClient.verifyIdToken({ idToken: tokens.id_token!, audience: env.GOOGLE_CLIENT_ID });
   const profile = ticket.getPayload();
   if (!profile?.sub || !profile.email) return response.status(400).send("Google did not return a usable profile.");
-  const user = await UserModel.findOneAndUpdate({ googleId: profile.sub }, { googleId: profile.sub, email: profile.email, name: profile.name ?? profile.email, avatarUrl: profile.picture }, { upsert: true, new: true, setDefaultsOnInsert: true });
+  const user = await UserModel.findOneAndUpdate({ googleId: profile.sub }, { googleId: profile.sub, email: profile.email, name: profile.name ?? profile.email, avatarUrl: profile.picture }, { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true });
   request.session.userId = user._id.toString();
   return response.redirect(`${env.FRONTEND_ORIGIN}/analyze/upload`);
 }
