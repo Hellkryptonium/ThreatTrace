@@ -1,0 +1,32 @@
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 18px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.brandLockup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink-deep);
+  text-decoration: none;
+}
+
+.brandLockup > span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.brandLockup strong { font-size: 13px; letter-spacing: .14em; }
+.brandLockup small { color: var(--muted); font-size: 8px; letter-spacing: .13em; }
+.brandMark { display: grid; place-items: center; width: 30px; height: 30px; background: var(--ink-deep); color: #b8e6dd; font: 700 15px Georgia, serif; }
+.topActions { display: flex; align-items: center; gap: 18px; }
+.newAnalysis { display: flex; align-items: center; gap: 7px; color: var(--teal); font-size: 12px; text-decoration: none; }
+.newAnalysis span { font-size: 20px; line-height: 0; }
+
+@media (max-width: 700px) { .topActions { gap: 12px; } }

@@ -8,6 +8,7 @@ import { emailRouter } from "./routes/email.routes.js";
 import { investigationRouter } from "./routes/investigation.routes.js";
 import { authRouter } from "./routes/auth.routes.js";
 import { gmailRouter } from "./routes/gmail.routes.js";
+import { errorHandler } from "./middleware/error-handler.js";
 
 export function createApp() {
   const app = express();
@@ -20,9 +21,6 @@ export function createApp() {
   app.use("/api/v1/gmail", gmailRouter);
   app.use("/api/v1/emails", emailRouter);
   app.use("/api/v1/investigations", investigationRouter);
-  app.use((error: unknown, _request: express.Request, response: express.Response, _next: express.NextFunction) => {
-    const message = error instanceof Error ? error.message : "Unexpected server error.";
-    response.status(500).json({ error: message });
-  });
+  app.use(errorHandler);
   return app;
 }

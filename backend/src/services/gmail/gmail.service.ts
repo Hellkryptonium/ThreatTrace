@@ -38,12 +38,14 @@ export async function getGmailStatus(userId: string) { const account = await Gma
 export async function listGmailMessages(userId: string) {
   const gmail = await gmailForUser(userId);
   const result = await gmail.users.messages.list({ userId: "me", maxResults: 25, q: "-in:trash" });
-  const messages = await Promise.all((result.data.messages ?? []).slice(0, 25).map(async (message) => {
+  const messageResults = await Promise.allSettled((result.data.messages ?? []).slice(0, 25).filter((message) => message.id).map(async (message) => {
     const detail = await gmail.users.messages.get({ userId: "me", id: message.id!, format: "metadata", metadataHeaders: ["From", "To", "Subject", "Date"] });
     const headers = Object.fromEntries((detail.data.payload?.headers ?? []).map((header) => [header.name?.toLowerCase() ?? "", header.value ?? ""]));
     return { id: message.id, threadId: message.threadId, from: headers.from, to: headers.to, subject: headers.subject ?? "(no subject)", date: headers.date, snippet: detail.data.snippet };
   }));
-  return messages;
+  const rejected = messageResults.filter((item) => item.status === "rejected");
+  if (rejected.length) console.warn(`Gmail metadata lookup failed for ${rejected.length} message(s):`, rejected[0].reason);
+  return messageResults.flatMap((item) => item.status === "fulfilled" ? [item.value] : []);
 }
 
 export async function fetchGmailEmail(userId: string, messageId: string): Promise<NormalizedEmail> {

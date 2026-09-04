@@ -1,0 +1,31 @@
+.shell { min-height: 100vh; max-width: 1180px; margin: auto; padding: 24px 42px; }
+.inboxHeading { display: flex; align-items: end; justify-content: space-between; gap: 32px; padding: 72px 0 38px; }
+.inboxHeading h1 { color: var(--ink-deep); font-family: Georgia, serif; font-size: clamp(42px, 5vw, 62px); line-height: 1.02; letter-spacing: -.03em; font-weight: 400; margin: 14px 0 0; }
+.inboxHeading h1 em { color: var(--teal); font-style: normal; }
+.connected { display: inline-flex; align-items: center; gap: 8px; color: var(--green); font-size: 12px; white-space: nowrap; }
+.connected::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.connectButton, .analyzeButton { border: 1px solid #b9c8c4; border-radius: 3px; background: var(--surface); color: var(--teal); padding: 10px 15px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.connectButton:hover, .analyzeButton:hover { border-color: var(--teal); background: var(--teal-soft); }
+.messageList { border-top: 2px solid var(--ink-deep); background: rgba(255, 255, 255, .42); }
+.messageRow { display: grid; grid-template-columns: minmax(0, 1fr) 116px 92px; gap: 24px; align-items: center; border-bottom: 1px solid var(--line); padding: 21px 16px; transition: background .15s ease, box-shadow .15s ease; }
+.messageRow:hover { background: var(--surface); box-shadow: 0 4px 14px rgba(23, 37, 43, .06); }
+.messageMain { min-width: 0; }
+.messageMain strong { display: block; overflow: hidden; color: var(--ink-deep); font-size: 13px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.messageMain h2 { color: var(--ink-deep); font-family: Georgia, serif; font-size: 18px; letter-spacing: 0; text-transform: none; margin: 7px 0 5px; }
+.messageMain p { overflow: hidden; color: var(--muted); font-size: 12px; line-height: 1.45; white-space: nowrap; text-overflow: ellipsis; margin: 0; }
+.messageRow time { align-self: start; padding-top: 2px; color: var(--muted); font: 11px Consolas, monospace; text-align: right; white-space: nowrap; }
+.analyzeButton { cursor: pointer; justify-self: end; }
+.empty { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 32px; }
+.empty h2 { color: var(--ink); margin-bottom: 8px; }
+.empty p { color: var(--muted); }
+.error { display: flex; align-items: center; gap: 14px; color: var(--red); background: #fce8e6; padding: 13px 16px; border-radius: 4px; }
+
+@media (max-width: 700px) {
+  .shell { padding: 20px; }
+  .inboxHeading { align-items: flex-start; flex-direction: column; padding-top: 50px; }
+  .inboxHeading h1 { font-size: 44px; }
+  .messageRow { grid-template-columns: minmax(0, 1fr) auto; gap: 8px 16px; padding: 18px 12px; }
+  .messageRow time { grid-column: 1; grid-row: 2; justify-self: start; text-align: left; }
+  .analyzeButton { grid-column: 2; grid-row: 1 / span 2; }
+  .error { align-items: flex-start; flex-direction: column; }
+}
