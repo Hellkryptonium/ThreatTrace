@@ -74,6 +74,28 @@ export interface AnalysisResult {
   };
   classification: ThreatClassification;
   entities: ExtractedEntities;
+  mlAssistance?: MlAssistance;
+}
+
+export interface MlContribution {
+  feature: string;
+  impact: number;
+  direction: "UP" | "DOWN";
+  evidence?: string;
+}
+
+export interface MlAssistance {
+  available: boolean;
+  modelVersion?: string;
+  mlRiskScore?: number;
+  mlConfidence?: number;
+  uncertainty?: number;
+  effectiveWeight?: number;
+  deterministicRiskScore?: number;
+  deterministicConfidence?: number;
+  topContributors?: MlContribution[];
+  latencyMs?: number;
+  reason?: string;
 }
 
 export interface ThreatClassification {

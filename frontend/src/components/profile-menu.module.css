@@ -1,0 +1,16 @@
+.profile { position: relative; }
+.profileTrigger { display: flex; align-items: center; gap: 9px; border: 1px solid var(--line-soft); background: #fff; padding: 5px 9px 5px 6px; color: var(--ink-deep); cursor: pointer; }
+.profileTrigger > img, .profileTrigger > span:first-child { width: 28px; height: 28px; object-fit: cover; }
+.profileTrigger > span:first-child { display: grid; place-items: center; background: var(--teal-soft); color: var(--teal); font-size: 10px; font-weight: 700; }
+.profileCopy { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.profileCopy strong { font-size: 11px; font-weight: 700; }
+.profileCopy small { max-width: 145px; overflow: hidden; color: var(--muted); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.chevron { color: var(--muted); font-size: 16px; }
+.profileMenu { position: absolute; z-index: 4; top: calc(100% + 8px); right: 0; width: 220px; padding: 14px; border: 1px solid var(--line); background: #fff; box-shadow: 0 12px 30px #17252b1c; }
+.profileMenuHeading { color: var(--teal); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.statusDot { display: inline-block; width: 6px; height: 6px; margin-right: 5px; border-radius: 50%; background: #33a675; }
+.profileMenuEmail { overflow: hidden; margin: 8px 0 14px; color: var(--muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.logoutButton { display: flex; width: 100%; justify-content: space-between; border: 0; border-top: 1px solid var(--line-soft); padding: 12px 0 0; background: none; color: var(--ink-deep); font-size: 12px; cursor: pointer; text-align: left; }
+.logoutButton:hover { color: var(--teal); }
+
+@media (max-width: 700px) { .profileCopy { display: none; } }
