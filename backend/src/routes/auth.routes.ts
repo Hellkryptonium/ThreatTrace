@@ -1,10 +1,18 @@
 import { Router } from "express";
 import { asyncHandler } from "../utils/async-handler.js";
-import { completeGoogleLogin, getCurrentUser, logout, startGoogleLogin } from "../controllers/auth.controller.js";
+import { completeGoogleLogin, completeMicrosoftLogin, getCurrentUser, login, logout, register, startGoogleLogin, startMicrosoftLogin, updateAvatar, updateProfile } from "../controllers/auth.controller.js";
+import { requireAuth } from "../middleware/auth.js";
+import { avatarUpload } from "../middleware/upload.js";
 
 export const authRouter = Router();
 
 authRouter.get("/google", startGoogleLogin);
 authRouter.get("/google/callback", asyncHandler(completeGoogleLogin));
+authRouter.get("/microsoft", asyncHandler(startMicrosoftLogin));
+authRouter.get("/microsoft/callback", asyncHandler(completeMicrosoftLogin));
+authRouter.post("/register", asyncHandler(register));
+authRouter.post("/login", asyncHandler(login));
 authRouter.get("/me", asyncHandler(getCurrentUser));
+authRouter.patch("/profile", requireAuth, asyncHandler(updateProfile));
+authRouter.patch("/profile/avatar", requireAuth, avatarUpload.single("avatar"), asyncHandler(updateAvatar));
 authRouter.post("/logout", logout);

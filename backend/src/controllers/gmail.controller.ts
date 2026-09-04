@@ -1,7 +1,6 @@
 import crypto from "node:crypto";
 import type { Request, Response } from "express";
 import { env } from "../config/env.js";
-import { UserModel } from "../models/User.js";
 import { createGoogleClient, fetchGmailEmail, getGmailProfile, getGmailStatus, listGmailMessages, saveGmailAccount } from "../services/gmail/gmail.service.js";
 import { createInvestigation } from "../services/analysis/create-investigation.service.js";
 
@@ -26,9 +25,8 @@ export async function completeGmailConnection(request: Request, response: Respon
   catch { return response.status(400).send("Google rejected the Gmail authorization code. Confirm the registered redirect URI and start a new connection."); }
   client.setCredentials(tokens);
   const gmailProfile = await getGmailProfile(client);
-  const user = await UserModel.findById(request.session.userId).select("googleId").lean();
-  if (!user?.googleId || !gmailProfile.emailAddress) return response.status(400).send("Google authorization succeeded, but the Gmail account profile was incomplete.");
-  await saveGmailAccount(request.session.userId!, tokens, { sub: user.googleId, email: gmailProfile.emailAddress });
+  if (!gmailProfile.emailAddress) return response.status(400).send("Google authorization succeeded, but the Gmail account profile was incomplete.");
+  await saveGmailAccount(request.session.userId!, tokens, { sub: gmailProfile.emailAddress, email: gmailProfile.emailAddress });
   delete request.session.gmailState;
   return response.redirect(`${env.FRONTEND_ORIGIN}/emails`);
 }

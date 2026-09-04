@@ -1,9 +1,9 @@
 import dns from "node:dns/promises";
 import { env } from "../../config/env.js";
-import type { DomainEnrichment, EnrichmentResult, IpEnrichment, NormalizedEmail, UrlReputation } from "../../types/email.js";
+import type { DomainEnrichment, EnrichmentProviderStatus, EnrichmentResult, IpEnrichment, NormalizedEmail, UrlReputation } from "../../types/email.js";
 
 const timeout = 5000;
-const trackedDomains = new Set(["sendclean.net", "fpktrans.sendclean.net"]);
+const reputationLimit = 10;
 
 async function getJson<T>(url: string, headers?: HeadersInit): Promise<T | undefined> {
   try {
@@ -28,20 +28,34 @@ async function enrichIp(ip: string): Promise<IpEnrichment> {
   return { ip, country: result?.country, region: result?.regionName, city: result?.city, isp: result?.isp, organization: result?.org, asn: result?.as };
 }
 
-async function reputation(url: string): Promise<UrlReputation[]> {
+interface ReputationResult {
+  results: UrlReputation[];
+  virusTotal: { succeeded: boolean; message?: string };
+  urlScan: { succeeded: boolean; message?: string };
+}
+
+async function reputation(url: string): Promise<ReputationResult> {
   const results: UrlReputation[] = [];
+  const virusTotal = { succeeded: false } as ReputationResult["virusTotal"];
+  const urlScan = { succeeded: false } as ReputationResult["urlScan"];
   if (env.VIRUSTOTAL_API_KEY) {
     const id = Buffer.from(url).toString("base64url").replace(/=+$/, "");
     const result = await getJson<{ data?: { attributes?: { last_analysis_stats?: { malicious?: number; suspicious?: number } } } }>(`https://www.virustotal.com/api/v3/urls/${id}`, { "x-apikey": env.VIRUSTOTAL_API_KEY });
     const stats = result?.data?.attributes?.last_analysis_stats;
-    if (stats) results.push({ url, source: "VirusTotal", malicious: stats.malicious, suspicious: stats.suspicious, permalink: `https://www.virustotal.com/gui/url/${id}` });
+    if (stats) {
+      virusTotal.succeeded = true;
+      results.push({ url, source: "VirusTotal", malicious: stats.malicious, suspicious: stats.suspicious, permalink: `https://www.virustotal.com/gui/url/${id}` });
+    } else virusTotal.message = "URL was not found in VirusTotal or the request failed.";
   }
   if (env.URLSCAN_API_KEY) {
     const result = await getJson<{ results?: { task?: { uuid?: string }; page?: { domain?: string } }[] }>(`https://urlscan.io/api/v1/search/?q=page.url:${encodeURIComponent(url)}`, { "API-Key": env.URLSCAN_API_KEY });
     const match = result?.results?.[0];
-    if (match) results.push({ url, source: "URLScan", verdict: match.page?.domain ? `Observed at ${match.page.domain}` : "Observed" , permalink: match.task?.uuid ? `https://urlscan.io/result/${match.task.uuid}/` : undefined });
+    if (match) {
+      urlScan.succeeded = true;
+      results.push({ url, source: "URLScan", verdict: match.page?.domain ? `Observed at ${match.page.domain}` : "Observed", permalink: match.task?.uuid ? `https://urlscan.io/result/${match.task.uuid}/` : undefined });
+    } else urlScan.message = "No URLScan observation was found or the request failed.";
   }
-  return results;
+  return { results, virusTotal, urlScan };
 }
 
 export async function enrichEmail(email: NormalizedEmail, probableOriginIp?: string): Promise<EnrichmentResult> {
@@ -53,10 +67,27 @@ export async function enrichEmail(email: NormalizedEmail, probableOriginIp?: str
   const urlValues = email.urls.slice(0, 30);
   const urlDomains = urlValues.flatMap((url) => { try { return [new URL(url).hostname]; } catch { return []; } });
   urlDomains.forEach((domain) => domains.add(domain));
-  const [domainResults, ipResults, urlResults] = await Promise.all([
+  const reputationUrls = urlValues.filter((url) => { try { return new URL(url).protocol === "http:" || new URL(url).protocol === "https:"; } catch { return false; } }).slice(0, reputationLimit);
+  const reputationResults = await Promise.all(reputationUrls.map(reputation));
+  const providerStatus = (provider: "virusTotal" | "urlScan", configured: boolean): EnrichmentProviderStatus => {
+    const outcomes = reputationResults.map((item) => item[provider]);
+    const succeeded = outcomes.filter((item) => item.succeeded).length;
+    const failed = outcomes.length - succeeded;
+    const firstMessage = outcomes.find((item) => item.message)?.message;
+    return { configured, checked: outcomes.length, succeeded, failed, ...(firstMessage ? { message: firstMessage } : {}) };
+  };
+  const [domainResults, ipResults] = await Promise.all([
     Promise.all([...domains].map(enrichDomain)),
     probableOriginIp ? enrichIp(probableOriginIp).then((value) => [value]) : Promise.resolve([] as IpEnrichment[]),
-    Promise.all(urlValues.filter((url) => { try { return trackedDomains.has(new URL(url).hostname); } catch { return false; } }).slice(0, 10).map(reputation)).then((values) => values.flat()),
   ]);
-  return { domains: domainResults, ips: ipResults, urls: urlResults, completedAt: new Date().toISOString() };
+  return {
+    domains: domainResults,
+    ips: ipResults,
+    urls: reputationResults.flatMap((item) => item.results),
+    providers: {
+      virusTotal: providerStatus("virusTotal", Boolean(env.VIRUSTOTAL_API_KEY)),
+      urlScan: providerStatus("urlScan", Boolean(env.URLSCAN_API_KEY)),
+    },
+    completedAt: new Date().toISOString(),
+  };
 }

@@ -10,6 +10,7 @@
 .profileMenuHeading { color: var(--teal); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 .statusDot { display: inline-block; width: 6px; height: 6px; margin-right: 5px; border-radius: 50%; background: #33a675; }
 .profileMenuEmail { overflow: hidden; margin: 8px 0 14px; color: var(--muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.profileLink { display: block; border-top: 1px solid var(--line-soft); padding: 12px 0; color: var(--teal); font-size: 12px; text-decoration: none; }
 .logoutButton { display: flex; width: 100%; justify-content: space-between; border: 0; border-top: 1px solid var(--line-soft); padding: 12px 0 0; background: none; color: var(--ink-deep); font-size: 12px; cursor: pointer; text-align: left; }
 .logoutButton:hover { color: var(--teal); }
 

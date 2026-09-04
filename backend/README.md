@@ -155,6 +155,7 @@ Current areas include:
 ```text
 /api/v1/auth
 /api/v1/gmail
+/api/v1/outlook
 /api/v1/emails
 /api/v1/investigations
 ```
@@ -169,6 +170,11 @@ GET  /api/v1/gmail/connect
 GET  /api/v1/gmail/status
 GET  /api/v1/gmail/messages
 POST /api/v1/gmail/messages/:messageId/analyze
+
+GET  /api/v1/outlook/connect
+GET  /api/v1/outlook/status
+GET  /api/v1/outlook/messages
+POST /api/v1/outlook/messages/:messageId/analyze
 
 POST /api/v1/emails/upload
 
@@ -201,11 +207,18 @@ GMAIL_TOKEN_ENCRYPTION_KEY=
 
 VIRUSTOTAL_API_KEY=
 URLSCAN_API_KEY=
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
 ```
 
 Never commit `.env` or API credentials.
 
+Cloudinary is optional. When configured, profile avatars are stored as images and uploaded `.eml` files are archived as private raw assets. Analysis continues without storage if Cloudinary is unavailable.
+
 Gmail requires the Gmail API to be enabled in Google Cloud with the appropriate OAuth redirect URI configured.
+
+Outlook requires a Microsoft Entra app registration with delegated `User.Read`, `Mail.Read`, `openid`, `profile`, `email`, and `offline_access` permissions. Register the callback URL from `OUTLOOK_CALLBACK_URL` exactly.
 
 ---
 
