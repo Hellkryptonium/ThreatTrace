@@ -10,3 +10,9 @@ export const emailUpload = multer({
     callback(null, validExtension && validMime);
   },
 });
+
+export const avatarUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024, files: 1 },
+  fileFilter: (_request, file, callback) => callback(null, file.mimetype.startsWith("image/")),
+});

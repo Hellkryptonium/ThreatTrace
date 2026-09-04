@@ -1,23 +1,30 @@
-import { Header } from "@/components/landing/Header";
-import { Hero } from "@/components/landing/Hero";
-import { RecentScans } from "@/components/landing/RecentScans";
-import { Features } from "@/components/landing/Features";
-import { Quote } from "@/components/landing/Quote";
-import { Footer } from "@/components/landing/Footer";
+import Link from "next/link";
+import styles from "./home.module.css";
+
+const capabilities = [
+  { index: "01 / INGEST", title: "Gmail + Outlook", text: "Connect the inboxes your team already uses, or upload a raw .eml message for a focused review." },
+  { index: "02 / EVIDENCE", title: "Deterministic analysis", text: "Trace sender identity, authentication results, URLs, attachments, and mail routes with explainable rules." },
+  { index: "03 / INTELLIGENCE", title: "VirusTotal", text: "Cross-check extracted URLs against a broad reputation dataset and preserve the provider evidence." },
+  { index: "04 / INTELLIGENCE", title: "URLScan", text: "Look for observed URL infrastructure and connect provider reports back to the investigation." },
+  { index: "05 / ASSIST", title: "ML assistance", text: "Use model calibration and contributor signals to add context without hiding the deterministic score." },
+  { index: "06 / OUTCOME", title: "Analyst-ready reports", text: "Move from a suspicious message to a structured, evidence-backed investigation in one workspace." },
+];
 
 export default function Home() {
-  return (
-    <div className="bg-surface font-body text-on-surface antialiased">
-      <Header />
-      <main className="w-full pt-20 bg-surface min-h-[calc(100vh-20rem)]">
-        <div className="flex flex-col w-full">
-          <Hero />
-          <RecentScans />
-          <Features />
-          <Quote />
-        </div>
+  return <div className={styles.page}>
+    <div className={styles.container}>
+      <nav className={styles.nav} aria-label="Primary navigation">
+        <Link href="/" className={styles.brand}><span className={styles.brandMark}>T</span><span className={styles.brandText}><strong>THREATTRACE</strong><small>EVIDENCE-FIRST SECURITY</small></span></Link>
+        <div className={styles.navLinks}><Link href="#capabilities">Capabilities</Link><Link href="/safety-guides">Safety guides</Link></div>
+        <div className={styles.navActions}><Link href="/login" className={styles.login}>Sign in</Link><Link href="/register" className={styles.register}>Create account</Link></div>
+      </nav>
+      <main>
+        <section className={styles.hero}><div><p className={styles.eyebrow}>Email investigation workspace</p><h1 className={styles.heroTitle}>Turn inbox doubt into <em>clear evidence.</em></h1><p className={styles.heroCopy}>ThreatTrace brings mailbox connections, deterministic forensics, reputation intelligence, and AI-assisted context into one calm workflow for suspicious email.</p><div className={styles.heroActions}><Link href="/register" className={styles.primaryAction}>Create your workspace</Link><Link href="/analyze/upload" className={styles.secondaryAction}>Analyze an .eml</Link></div><p className={styles.heroNote}>GMAIL · OUTLOOK · EML / PRIVATE SESSION WORKSPACE</p></div><div className={styles.preview} aria-label="Investigation report preview"><div className={styles.previewTop}><span className={styles.previewLabel}>LIVE INVESTIGATION / TT-0428</span><span className={styles.previewLive}>EVIDENCE READY</span></div><div className={styles.previewBody}><div className={styles.mailMeta}><small>MESSAGE SIGNALS</small><h2>Account security notice</h2><p>security-alert@external-domain.example</p></div><div className={styles.score}><div className={styles.scoreInner}><strong>72</strong><span>RISK / 100</span></div></div><div className={styles.signalList}><div className={styles.signal}><span className={styles.signalMark}>01</span><span><strong>Authentication</strong> · sender evidence needs review</span></div><div className={styles.signal}><span className={styles.signalMark}>02</span><span><strong>Mail route</strong> · origin infrastructure reconstructed</span></div><div className={styles.signal}><span className={styles.signalMark}>03</span><span><strong>URL intelligence</strong> · reputation checks attached</span></div><div className={styles.signal}><span className={styles.signalMark}>04</span><span><strong>ML calibration</strong> · supporting context available</span></div></div></div><div className={styles.previewFooter}><span>DETERMINISTIC SCORE + PROVIDER EVIDENCE</span><span>OPEN REPORT →</span></div></div></section>
+        <section className={styles.capabilities} id="capabilities"><div className={styles.sectionHead}><div><p className={styles.eyebrow}>One investigation surface</p><h2>Every signal has a place in the story.</h2></div><p>Start with the message. Follow the evidence through identity, infrastructure, reputation, and model-assisted context.</p></div><div className={styles.capabilityGrid}>{capabilities.map((capability) => <article className={styles.capability} key={capability.index}><span className={styles.capabilityIndex}>{capability.index}</span><h3>{capability.title}</h3><p>{capability.text}</p></article>)}</div></section>
+        <section className={styles.workflow}><div className={`${styles.container} ${styles.workflowGrid}`}><div><p className={styles.eyebrow}>How the work moves</p><h2>Evidence first.<br />AI second.</h2><p>ThreatTrace keeps the reasoning visible. Rules produce the baseline; enrichment and ML add context an analyst can inspect.</p></div><div className={styles.workflowSteps}><div className={styles.step}><span className={styles.stepNumber}>01</span><div><h3>Connect or upload</h3><p>Bring in Gmail, Outlook, or a raw message without changing your existing workflow.</p></div></div><div className={styles.step}><span className={styles.stepNumber}>02</span><div><h3>Reconstruct the evidence</h3><p>Inspect headers, authentication, sender relationships, URLs, attachments, and the mail route.</p></div></div><div className={styles.step}><span className={styles.stepNumber}>03</span><div><h3>Decide with context</h3><p>Review provider intelligence, ML calibration, and a plain-language recommended action.</p></div></div></div></div></section>
+        <section className={styles.cta}><p className={styles.eyebrow}>Ready when you are</p><h2>Give your next suspicious email a proper investigation.</h2><p>Create a workspace, connect a mailbox when you need it, and keep the evidence close to the decision.</p><Link href="/register" className={styles.primaryAction}>Create a free workspace</Link></section>
       </main>
-      <Footer />
+      <footer className={styles.footer}><div className={styles.footerRow}><span>THREATTRACE / EVIDENCE-FIRST EMAIL SECURITY</span><span className={styles.footerLinks}><Link href="/login">Sign in</Link><Link href="/safety-guides">Safety guides</Link><Link href="/analyze/upload">Upload .eml</Link></span></div></footer>
     </div>
-  );
+  </div>;
 }

@@ -46,6 +46,10 @@ export interface EnrichmentResult {
   domains: { domain: string; dns: { addresses: string[]; mx: string[] }; rdap?: { registrar?: string; created?: string; expires?: string; status?: string[] } }[];
   ips: { ip: string; country?: string; region?: string; city?: string; isp?: string; organization?: string; asn?: string }[];
   urls: { url: string; source: string; verdict?: string; malicious?: number; suspicious?: number; permalink?: string }[];
+  providers?: {
+    virusTotal?: { configured: boolean; checked: number; succeeded: number; failed: number; message?: string };
+    urlScan?: { configured: boolean; checked: number; succeeded: number; failed: number; message?: string };
+  };
 }
 
 export interface ScoreExplanation { label: string; contribution: number; status: string; evidence?: string; }

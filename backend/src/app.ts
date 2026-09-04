@@ -9,6 +9,7 @@ import { investigationRouter } from "./routes/investigation.routes.js";
 import { authRouter } from "./routes/auth.routes.js";
 import { gmailRouter } from "./routes/gmail.routes.js";
 import { errorHandler } from "./middleware/error-handler.js";
+import { outlookRouter } from "./routes/outlook.routes.js";
 
 export function createApp() {
   const app = express();
@@ -19,6 +20,7 @@ export function createApp() {
   app.get("/health", (_request, response) => response.json({ status: "ok" }));
   app.use("/api/v1/auth", authRouter);
   app.use("/api/v1/gmail", gmailRouter);
+  app.use("/api/v1/outlook", outlookRouter);
   app.use("/api/v1/emails", emailRouter);
   app.use("/api/v1/investigations", investigationRouter);
   app.use(errorHandler);

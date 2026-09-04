@@ -25,6 +25,11 @@ describe("ThreatTrace API", () => {
     expect(response.status).toBe(401);
   });
 
+  it("protects Outlook access", async () => {
+    const response = await request(app).get("/api/v1/outlook/status");
+    expect(response.status).toBe(401);
+  });
+
   it("persists URL and route intelligence in the analysis schema", () => {
     expect(AnalysisModel.schema.path("urlIntelligence")).toBeDefined();
     expect(AnalysisModel.schema.path("relayPath")).toBeDefined();

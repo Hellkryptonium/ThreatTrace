@@ -1,4 +1,4 @@
-export type EmailSource = "EML" | "GMAIL";
+export type EmailSource = "EML" | "GMAIL" | "OUTLOOK";
 export type ThreatVerdict = "SAFE" | "INCONCLUSIVE" | "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 export type FindingSeverity = "INFO" | "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
@@ -133,7 +133,19 @@ export interface EnrichmentResult {
   domains: DomainEnrichment[];
   ips: IpEnrichment[];
   urls: UrlReputation[];
+  providers?: {
+    virusTotal?: EnrichmentProviderStatus;
+    urlScan?: EnrichmentProviderStatus;
+  };
   completedAt: string;
+}
+
+export interface EnrichmentProviderStatus {
+  configured: boolean;
+  checked: number;
+  succeeded: number;
+  failed: number;
+  message?: string;
 }
 
 export interface DomainEnrichment {

@@ -37,6 +37,7 @@ export function ProfileMenu({ user }: ProfileMenuProps) {
     {open && <div className={styles.profileMenu} role="menu">
       <div className={styles.profileMenuHeading}><span className={styles.statusDot} /> Signed in</div>
       <div className={styles.profileMenuEmail}>{user?.email}</div>
+      <a className={styles.profileLink} href="/profile" role="menuitem" onClick={() => setOpen(false)}>Profile</a>
       <button className={styles.logoutButton} role="menuitem" onClick={() => void handleLogout()} disabled={loggingOut}>{loggingOut ? "Signing out..." : "Sign out"}<span>↗</span></button>
     </div>}
   </div>;

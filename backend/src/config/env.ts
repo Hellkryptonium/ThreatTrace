@@ -16,6 +16,14 @@ const envSchema = z.object({
   URLSCAN_API_KEY: z.string().optional(),
   ML_SERVICE_URL: z.string().url().default("http://127.0.0.1:8001"),
   ML_SERVICE_TIMEOUT_MS: z.coerce.number().int().positive().default(2500),
+  MICROSOFT_CLIENT_ID: z.string().min(1),
+  MICROSOFT_CLIENT_SECRET: z.string().min(1),
+  MICROSOFT_TENANT_ID: z.string().min(1).default("common"),
+  OUTLOOK_CALLBACK_URL: z.string().url().default("http://localhost:4000/api/v1/outlook/callback"),
+  MICROSOFT_AUTH_CALLBACK_URL: z.string().url().default("http://localhost:4000/api/v1/auth/microsoft/callback"),
+  CLOUDINARY_CLOUD_NAME: z.string().optional(),
+  CLOUDINARY_API_KEY: z.string().optional(),
+  CLOUDINARY_API_SECRET: z.string().optional(),
 });
 
 export const env = envSchema.parse(process.env);
