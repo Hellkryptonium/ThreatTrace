@@ -28,5 +28,9 @@
 .topActions { display: flex; align-items: center; gap: 18px; }
 .newAnalysis { display: flex; align-items: center; gap: 7px; color: var(--teal); font-size: 12px; text-decoration: none; }
 .newAnalysis span { font-size: 20px; line-height: 0; }
+.primaryNav { display: flex; align-items: center; gap: 16px; margin-left: auto; margin-right: 24px; }
+.primaryNav a { color: var(--muted); font-size: 11px; text-decoration: none; }
+.primaryNav a:hover, .primaryNav a:focus-visible { color: var(--teal); }
 
-@media (max-width: 700px) { .topActions { gap: 12px; } }
+@media (max-width: 980px) { .primaryNav { gap: 10px; margin-right: 14px; }.primaryNav a:nth-child(n+5) { display: none; } }
+@media (max-width: 700px) { .primaryNav { display: none; }.topActions { gap: 12px; } }

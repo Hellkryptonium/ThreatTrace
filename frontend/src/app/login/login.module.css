@@ -3,9 +3,10 @@
 .brand { color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: .14em; }
 .authPanel h1 { color: var(--ink); font-size: 42px; line-height: 1.05; font-weight: 400; margin: 18px 0; }
 .authPanel p:not(.brand), .authPanel small { color: var(--muted); line-height: 1.5; }
-.googleButton { display: inline-flex; align-items: center; gap: 10px; margin: 24px 0 18px; padding: 12px 16px; border: 1px solid var(--line); color: var(--ink); text-decoration: none; }
+.googleButton { display: block; margin-top: 10px; border: 1px solid var(--line); padding: 12px 16px; color: var(--ink); text-align: center; text-decoration: none;}
 .googleButton span { color: var(--blue); font-weight: 700; }
-.microsoftButton { display: block; margin-top: 10px; border: 1px solid var(--line); padding: 12px 16px; color: var(--ink); text-align: center; text-decoration: none; }.microsoftButton span { margin-right: 8px; color: #5b5fc7; font-weight: 700; }
+.microsoftButton { display: block; margin-top: 10px; border: 1px solid var(--line); padding: 12px 16px; color: var(--ink); text-align: center; text-decoration: none; }
+.microsoftButton span { margin-right: 8px; color: #5b5fc7; font-weight: 700; }
 .form { display: grid; gap: 14px; margin: 24px 0 14px; }
 .field { display: grid; gap: 6px; color: var(--ink-deep); font-size: 11px; font-weight: 700; }
 .field input { border: 1px solid var(--line); padding: 12px; outline: none; }

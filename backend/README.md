@@ -210,9 +210,13 @@ URLSCAN_API_KEY=
 CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
+GEMINI_API_KEY=
+GEMINI_MODEL=gemini-3-flash-preview
 ```
 
 Never commit `.env` or API credentials.
+
+Gemini powers the optional read-only Security Copilot. Set `GEMINI_API_KEY` to enable it; `GEMINI_MODEL` defaults to `gemini-3-flash-preview` and can be changed when your account uses a different Gemini 3 model.
 
 Cloudinary is optional. When configured, profile avatars are stored as images and uploaded `.eml` files are archived as private raw assets. Analysis continues without storage if Cloudinary is unavailable.
 

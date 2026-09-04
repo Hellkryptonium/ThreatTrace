@@ -28,7 +28,7 @@ export async function completeGmailConnection(request: Request, response: Respon
   if (!gmailProfile.emailAddress) return response.status(400).send("Google authorization succeeded, but the Gmail account profile was incomplete.");
   await saveGmailAccount(request.session.userId!, tokens, { sub: gmailProfile.emailAddress, email: gmailProfile.emailAddress });
   delete request.session.gmailState;
-  return response.redirect(`${env.FRONTEND_ORIGIN}/emails`);
+  return response.redirect(`${env.FRONTEND_ORIGIN}/connections`);
 }
 
 export async function getGmailConnectionStatus(request: Request, response: Response) { return response.json(await getGmailStatus(request.session.userId!)); }

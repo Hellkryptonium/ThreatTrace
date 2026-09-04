@@ -7,6 +7,7 @@ import { getCurrentUser, type CurrentUser } from "@/lib/api/auth";
 import { AppHeader } from "@/components/app-header";
 import styles from "./investigation.module.css";
 import type { AnalystVerdict, EnrichmentResult, Finding, MlAssistance, RelayHop, ScoreExplanation, ThreatClassification, UrlIntelligence } from "@/lib/api/emails";
+import { RouteMap, type RouteMapPoint } from "@/components/investigation/route-map";
 
 interface Investigation {
   analysisId: {
@@ -35,6 +36,19 @@ interface Investigation {
 }
 
 type ReportSection = "findings" | "score" | "authentication" | "route" | "infrastructure" | "urls";
+
+function routeMapPoints(relayPath: RelayHop[], ipResults: NonNullable<EnrichmentResult>["ips"], probableOriginIp?: string): RouteMapPoint[] {
+  const locations = new Map(ipResults.filter((item) => Number.isFinite(item.latitude) && Number.isFinite(item.longitude)).map((item) => [item.ip, item]));
+  const points: RouteMapPoint[] = [];
+  const seen = new Set<string>();
+  relayPath.forEach((hop) => hop.ipAddresses.forEach((ip) => {
+    const location = locations.get(ip);
+    if (!location || seen.has(ip)) return;
+    seen.add(ip);
+    points.push({ ip, hop: hop.hop, role: ip === probableOriginIp ? "ORIGIN" : "RELAY", city: location.city, region: location.region, country: location.country, latitude: location.latitude!, longitude: location.longitude!, isp: location.isp || location.organization, asn: location.asn });
+  }));
+  return points;
+}
 
 function EvidenceGraph({ sender, entities, relayPath }: { sender: string; entities?: Investigation["analysisId"]["entities"]; relayPath: RelayHop[] }) {
   const senderDomain = sender.split("@")[1] ?? "sender domain";
@@ -75,6 +89,7 @@ export default function InvestigationPage() {
   const entities = analysis.entities;
   const ml = analysis.mlAssistance;
   const authentication = analysis.authentication ?? { spf: undefined, dkim: undefined, dmarc: undefined };
+  const mapPoints = routeMapPoints(relayPath, enrichment?.ips ?? [], analysis.probableOriginIp);
   const urlGroups = [...urlIntelligence.reduce((groups, item) => {
     const key = `${item.category}:${item.domain}`;
     const group = groups.get(key) ?? { ...item, urls: [] as string[] };
@@ -115,7 +130,7 @@ export default function InvestigationPage() {
             {entities && <section className={styles.workspaceSubsection}><h2>Extracted entities</h2>{(["emails", "domains", "ips", "urls", "attachments"] as const).map((key) => <div className={styles.entityLine} key={key}><span>{key}</span><strong>{entities[key].length}</strong><details><summary>View values</summary>{entities[key].map((value) => <code key={value}>{value}</code>)}</details></div>)}</section>}
           </section></div>}
           {openSection === "authentication" && <div className={styles.workspaceView}><section className={styles.workspaceCard}><h2>Authentication</h2>{Object.entries(authentication).map(([key, value]) => <p className={styles.auth} key={key}><span>{key.toUpperCase()}</span><strong>{value ?? "NOT FOUND"}</strong></p>)}</section></div>}
-          {openSection === "route" && <div className={styles.workspaceView}><section className={styles.workspaceCard}><h2>Mail route</h2>{analysis.probableOriginIp ? <p className={styles.origin}><strong>{analysis.probableOriginIp}</strong><span>{email.sender.email.endsWith("@gmail.com") ? "Gmail relay infrastructure observed" : "Earliest public relay IP observed"}</span></p> : <p className="muted">No public origin IP could be established.</p>}{relayPath.map((hop) => <div className={styles.relayHop} key={hop.hop}><span>HOP {hop.hop}</span><code>{hop.ipAddresses.join(", ") || "No IP address"}</code></div>)}<p className={styles.routeNote}>Relay data shows infrastructure reported by message headers. It does not prove a sender&apos;s physical location or identity.</p></section></div>}
+          {openSection === "route" && <div className={styles.workspaceView}><section className={styles.workspaceCard}><h2>Mail route intelligence</h2>{analysis.probableOriginIp ? <p className={styles.origin}><strong>{analysis.probableOriginIp}</strong><span>{email.sender.email.endsWith("@gmail.com") ? "Gmail relay infrastructure observed" : "Earliest public relay IP observed"}</span></p> : <p className="muted">No public origin IP could be established.</p>}<RouteMap points={mapPoints} />{relayPath.map((hop) => <div className={styles.relayHop} key={hop.hop}><span>HOP {hop.hop}</span><code>{hop.ipAddresses.join(", ") || "No IP address"}</code></div>)}<p className={styles.routeNote}>Relay data shows infrastructure reported by message headers. It does not prove a sender&apos;s physical location or identity.</p></section></div>}
           {openSection === "infrastructure" && <div className={styles.workspaceView}><section className={styles.workspaceCard}><h2>Infrastructure enrichment</h2>{enrichment ? <><p className={styles.enrichmentNote}>Best-effort public lookups. Results are contextual evidence, not attribution.</p>{enrichment.providers && <div className={styles.providerStatus}>{([['VirusTotal', enrichment.providers.virusTotal], ['URLScan', enrichment.providers.urlScan]] as const).map(([name, provider]) => provider && <div className={styles.providerStatusCard} key={name}><strong>{name}</strong><span>{provider.configured ? `${provider.succeeded} result${provider.succeeded === 1 ? '' : 's'} from ${provider.checked} URL${provider.checked === 1 ? '' : 's'}` : 'API key not configured'}</span>{provider.message && <span>{provider.message}</span>}</div>)}</div>}{enrichment.ips.map((item) => <div className={styles.enrichmentBlock} key={item.ip}><strong>{item.ip}</strong><span>{[item.city, item.region, item.country].filter(Boolean).join(", ") || "Approximate network location unavailable"}</span><span>{item.isp || item.organization || "Network unavailable"}{item.asn ? ` · ${item.asn}` : ""}</span></div>)}{enrichment.domains.map((item) => <div className={styles.enrichmentBlock} key={item.domain}><strong>{item.domain}</strong><span>DNS: {item.dns.addresses.join(", ") || "No A record"}</span><span>MX: {item.dns.mx.join(", ") || "No MX record"}</span><span>Registrar: {item.rdap?.registrar || "Unavailable"}</span></div>)}{enrichment.urls.map((item) => <div className={styles.enrichmentBlock} key={`${item.source}-${item.url}`}><strong>{item.source}</strong><span>{item.verdict || `Malicious: ${item.malicious ?? 0} · Suspicious: ${item.suspicious ?? 0}`}</span><a className={styles.providerLink} href={item.permalink} target="_blank" rel="noreferrer">View provider report</a></div>)}</> : <p className="muted">Enrichment was not available for this analysis.</p>}</section></div>}
           {openSection === "urls" && <div className={styles.workspaceView}><section className={styles.workspaceCard}><h2>URL intelligence</h2>{urlGroups.map((item) => <div className={styles.urlItem} key={`${item.category}-${item.domain}`}><span>{item.category.replaceAll("_", " ")} · {item.domain} · {item.urls.length} link{item.urls.length === 1 ? "" : "s"}</span><code>{item.category === "DIRECT" ? `${item.domain} (destination link)` : item.decodedTarget?.startsWith("http") ? item.decodedTarget : "Destination unavailable (encoded or obfuscated payload)"}</code><details><summary>View raw URL{item.urls.length === 1 ? "" : "s"}</summary>{item.urls.map((url) => <code key={url}>{url}</code>)}</details></div>)}<h2>Attachments</h2>{email.attachments.map((attachment) => <p className={styles.attachment} key={attachment.sha256}>{attachment.filename}<br /><code>{attachment.sha256}</code></p>)}</section></div>}
         </div>

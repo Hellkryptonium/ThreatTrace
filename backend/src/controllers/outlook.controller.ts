@@ -22,7 +22,7 @@ export async function completeOutlookConnection(request: Request, response: Resp
   const result = await client.acquireTokenByCode({ code, scopes: ["openid", "profile", "email", "User.Read", "Mail.Read", "offline_access"], redirectUri: env.OUTLOOK_CALLBACK_URL });
   await saveOutlookAccount(request.session.userId!, client, result);
   delete request.session.outlookState;
-  return response.redirect(`${env.FRONTEND_ORIGIN}/emails`);
+  return response.redirect(`${env.FRONTEND_ORIGIN}/connections`);
 }
 
 export async function getOutlookConnectionStatus(request: Request, response: Response) { return response.json(await getOutlookStatus(request.session.userId!)); }

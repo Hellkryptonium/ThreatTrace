@@ -1,9 +1,12 @@
 import dns from "node:dns/promises";
 import { env } from "../../config/env.js";
 import type { DomainEnrichment, EnrichmentProviderStatus, EnrichmentResult, IpEnrichment, NormalizedEmail, UrlReputation } from "../../types/email.js";
+import { isPublicIpv4 } from "../analysis/route-forensics.js";
 
 const timeout = 5000;
 const reputationLimit = 10;
+const ipLookupLimit = 10;
+const ipCache = new Map<string, IpEnrichment>();
 
 async function getJson<T>(url: string, headers?: HeadersInit): Promise<T | undefined> {
   try {
@@ -24,8 +27,12 @@ async function enrichDomain(domain: string): Promise<DomainEnrichment> {
 }
 
 async function enrichIp(ip: string): Promise<IpEnrichment> {
-  const result = await getJson<{ status?: string; query?: string; country?: string; regionName?: string; city?: string; isp?: string; org?: string; as?: string }>(`http://ip-api.com/json/${encodeURIComponent(ip)}?fields=status,query,country,regionName,city,isp,org,as`);
-  return { ip, country: result?.country, region: result?.regionName, city: result?.city, isp: result?.isp, organization: result?.org, asn: result?.as };
+  const cached = ipCache.get(ip);
+  if (cached) return cached;
+  const result = await getJson<{ success?: boolean; country?: string; region?: string; city?: string; latitude?: number; longitude?: number; connection?: { isp?: string; org?: string; asn?: number | string } }>(`https://ipwho.is/${encodeURIComponent(ip)}`);
+  const enrichment: IpEnrichment = { ip, country: result?.country, region: result?.region, city: result?.city, latitude: result?.latitude, longitude: result?.longitude, isp: result?.connection?.isp, organization: result?.connection?.org, asn: result?.connection?.asn ? String(result.connection.asn) : undefined, source: "ipwho.is", retrievedAt: new Date().toISOString() };
+  ipCache.set(ip, enrichment);
+  return enrichment;
 }
 
 interface ReputationResult {
@@ -58,7 +65,7 @@ async function reputation(url: string): Promise<ReputationResult> {
   return { results, virusTotal, urlScan };
 }
 
-export async function enrichEmail(email: NormalizedEmail, probableOriginIp?: string): Promise<EnrichmentResult> {
+export async function enrichEmail(email: NormalizedEmail, probableOriginIp?: string, relayIps: string[] = []): Promise<EnrichmentResult> {
   const domains = new Set<string>();
   for (const address of [email.sender.email, email.replyTo, email.returnPath]) {
     const value = address?.replace(/[<>]/g, "").split("@")[1]?.toLowerCase();
@@ -76,9 +83,10 @@ export async function enrichEmail(email: NormalizedEmail, probableOriginIp?: str
     const firstMessage = outcomes.find((item) => item.message)?.message;
     return { configured, checked: outcomes.length, succeeded, failed, ...(firstMessage ? { message: firstMessage } : {}) };
   };
+  const publicIps = [...new Set([probableOriginIp, ...relayIps].filter((ip): ip is string => ip !== undefined && isPublicIpv4(ip)))].slice(0, ipLookupLimit);
   const [domainResults, ipResults] = await Promise.all([
     Promise.all([...domains].map(enrichDomain)),
-    probableOriginIp ? enrichIp(probableOriginIp).then((value) => [value]) : Promise.resolve([] as IpEnrichment[]),
+    Promise.all(publicIps.map(enrichIp)),
   ]);
   return {
     domains: domainResults,

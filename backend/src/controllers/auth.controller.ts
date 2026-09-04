@@ -37,7 +37,7 @@ export async function completeMicrosoftLogin(request: Request, response: Respons
   } else { user.microsoftId = result.account.homeAccountId; await user.save(); }
   request.session.userId = user._id.toString();
   delete request.session.microsoftAuthState;
-  return response.redirect(`${env.FRONTEND_ORIGIN}/analyze/upload`);
+  return response.redirect(`${env.FRONTEND_ORIGIN}/dashboard`);
 }
 
 export async function completeGoogleLogin(request: Request, response: Response) {
@@ -57,7 +57,7 @@ export async function completeGoogleLogin(request: Request, response: Response) 
     user = await UserModel.create({ googleId: profile.sub, email: profile.email, username: profile.email.split("@")[0], name: profile.name ?? profile.email, avatarUrl: profile.picture, emailVerified: true });
   }
   request.session.userId = user._id.toString();
-  return response.redirect(`${env.FRONTEND_ORIGIN}/analyze/upload`);
+  return response.redirect(`${env.FRONTEND_ORIGIN}/dashboard`);
 }
 
 export async function register(request: Request, response: Response) {

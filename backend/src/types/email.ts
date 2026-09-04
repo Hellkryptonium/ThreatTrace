@@ -159,9 +159,13 @@ export interface IpEnrichment {
   country?: string;
   region?: string;
   city?: string;
+  latitude?: number;
+  longitude?: number;
   isp?: string;
   organization?: string;
   asn?: string;
+  source?: "ipwho.is";
+  retrievedAt?: string;
 }
 
 export interface UrlReputation {
