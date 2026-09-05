@@ -30,6 +30,11 @@ describe("ThreatTrace API", () => {
     expect(response.status).toBe(401);
   });
 
+  it("protects Copilot chat", async () => {
+    const response = await request(app).post("/api/v1/copilot/chat").send({ message: "Explain this verdict" });
+    expect(response.status).toBe(401);
+  });
+
   it("persists URL and route intelligence in the analysis schema", () => {
     expect(AnalysisModel.schema.path("urlIntelligence")).toBeDefined();
     expect(AnalysisModel.schema.path("relayPath")).toBeDefined();

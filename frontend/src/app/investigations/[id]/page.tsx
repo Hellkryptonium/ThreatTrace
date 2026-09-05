@@ -102,6 +102,10 @@ export default function InvestigationPage() {
     setOpenSection(section);
   }
 
+  function copilotHref(prompt: string) {
+    return `/copilot?${new URLSearchParams({ investigationId: id, prompt }).toString()}`;
+  }
+
   return (
     <main className={`${styles.shell} ${styles.investigation}`}>
       <AppHeader user={user} actionHref="/analyze/upload" actionLabel="+ New analysis" />
@@ -109,6 +113,13 @@ export default function InvestigationPage() {
         <div className={styles.resultMeta}><p className="kicker">INVESTIGATION COMPLETE <span>• JUST NOW</span></p><span className={styles.reportId}>REPORT / {id.slice(-8).toUpperCase()}</span></div>
         <div className={styles.scoreLayout}><div className={styles.scoreRing} style={{ "--score": `${analysis.riskScore * 3.6}deg` } as React.CSSProperties}><div><strong>{analysis.riskScore}</strong><span>/ 100</span></div></div><div className={styles.resultCopy}><p className={`${styles.verdict} ${styles[analysis.verdict.toLowerCase()]}`}>{analysis.verdict}</p><p className={styles.confidence}><span>CONFIDENCE</span>{Math.round(analysis.confidence * 100)}%</p><p className={styles.subject}>{email.subject || "Untitled message"}</p><p className="mono">FROM {email.sender.email}</p></div></div>
         {analysis.assessmentNote && <p className={styles.assessmentNote}>{analysis.assessmentNote}</p>}
+        <div className={styles.copilotActions} aria-label="Investigation Copilot actions">
+          <a href={copilotHref("Explain this verdict")}>Explain this verdict</a>
+          {email.urls[0] && <a href={copilotHref(`Investigate this URL: ${email.urls[0]}`)}>Investigate this URL</a>}
+          <a href={copilotHref("Find similar senders")}>Find similar senders</a>
+          <a href={copilotHref("Compare with previous emails")}>Compare with previous emails</a>
+          <a href={copilotHref("Summarize this report")}>Summarize this report</a>
+        </div>
       </section>
       <EvidenceGraph sender={email.sender.email} entities={entities} relayPath={relayPath} />
       <nav className={styles.reportNav} aria-label="Report sections"><button className={openSection === "findings" ? styles.active : ""} onClick={() => openReportSection("findings")}>Findings</button><button className={openSection === "score" ? styles.active : ""} onClick={() => openReportSection("score")}>Score logic</button><button className={openSection === "authentication" ? styles.active : ""} onClick={() => openReportSection("authentication")}>Authentication</button><button className={openSection === "route" ? styles.active : ""} onClick={() => openReportSection("route")}>Mail route</button><button className={openSection === "infrastructure" ? styles.active : ""} onClick={() => openReportSection("infrastructure")}>Infrastructure</button><button className={openSection === "urls" ? styles.active : ""} onClick={() => openReportSection("urls")}>URLs</button></nav>
@@ -118,7 +129,7 @@ export default function InvestigationPage() {
             {analysis.findings.length ? analysis.findings.map((item) => (
               <article className={styles.finding} key={item.id}>
                 <div><span className={`${styles.severity} ${styles[item.severity.toLowerCase()]}`}>{item.severity}</span><h3>{item.title}</h3><p>{item.description}</p></div>
-                <div className={styles.evidence}>{item.evidence.map((evidence) => <p key={`${evidence.field}-${evidence.value}`}><span>{evidence.field}</span><code>{evidence.value}</code></p>)}</div>
+                <div className={styles.evidence}>{item.evidence.map((evidence) => <p key={`${evidence.field}-${evidence.value}`}><span>{evidence.field}</span><code>{evidence.value}</code></p>)}<a className={styles.findingCopilot} href={copilotHref(`Explain the finding: ${item.title}`)}>Ask Copilot about this finding</a></div>
               </article>
             )) : <p className="muted">No suspicious indicators were detected by the current rules.</p>}
           </section></div>}
