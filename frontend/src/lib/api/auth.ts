@@ -1,9 +1,28 @@
 import { apiRequest } from "./client";
 
-export interface CurrentUser { id?: string; email: string; name: string; username?: string; avatarUrl?: string; emailVerified?: boolean; googleId?: string; microsoftId?: string; }
+export type OnboardingStatus = "in_progress" | "dismissed" | "completed";
+export type OnboardingIntake = "gmail" | "outlook" | "upload";
+
+export interface OnboardingState {
+  status: OnboardingStatus;
+  intake?: OnboardingIntake;
+  startedAt?: string;
+  dismissedAt?: string;
+  completedAt?: string;
+}
+
+export interface CurrentUser { id?: string; email: string; name: string; username?: string; avatarUrl?: string; emailVerified?: boolean; googleId?: string; microsoftId?: string; onboarding?: OnboardingState; }
 
 export function getCurrentUser() {
   return apiRequest<CurrentUser>("/api/v1/auth/me");
+}
+
+export function getOnboarding() {
+  return apiRequest<OnboardingState>("/api/v1/auth/onboarding");
+}
+
+export function updateOnboarding(input: Partial<Pick<OnboardingState, "status" | "intake">>) {
+  return apiRequest<OnboardingState>("/api/v1/auth/onboarding", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input) });
 }
 
 export function googleLoginUrl() {

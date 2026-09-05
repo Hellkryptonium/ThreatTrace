@@ -28,10 +28,10 @@ export function Footer() {
           <div>
             <h4 className="font-label text-xs font-semibold tracking-wider uppercase text-tertiary mb-4">Safety Guides</h4>
             <ul className="space-y-2.5 font-label text-xs">
-              <li><Link href="/safety-guides" className="text-on-surface-variant hover:text-primary transition-colors">How to Spot a Phishing Email</Link></li>
-              <li><Link href="/safety-guides" className="text-on-surface-variant hover:text-primary transition-colors">Protecting Your Bank Accounts</Link></li>
-              <li><Link href="/safety-guides" className="text-on-surface-variant hover:text-primary transition-colors">What to Do if You Clicked a Link</Link></li>
-              <li><Link href="/safety-guides" className="text-on-surface-variant hover:text-primary transition-colors">Family Safety Checklist</Link></li>
+              <li><Link href="/#safety-guides" className="text-on-surface-variant hover:text-primary transition-colors">How to Spot a Phishing Email</Link></li>
+              <li><Link href="/#safety-guides" className="text-on-surface-variant hover:text-primary transition-colors">Protecting Your Bank Accounts</Link></li>
+              <li><Link href="/#safety-guides" className="text-on-surface-variant hover:text-primary transition-colors">What to Do if You Clicked a Link</Link></li>
+              <li><Link href="/#safety-guides" className="text-on-surface-variant hover:text-primary transition-colors">Family Safety Checklist</Link></li>
             </ul>
           </div>
           

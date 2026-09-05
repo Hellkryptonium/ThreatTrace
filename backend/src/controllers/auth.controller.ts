@@ -9,6 +9,25 @@ import { uploadAvatar } from "../services/storage/cloudinary.service.js";
 
 const googleClient = new OAuth2Client(env.GOOGLE_CLIENT_ID, env.GOOGLE_CLIENT_SECRET, env.GOOGLE_CALLBACK_URL);
 
+type OnboardingStatus = "in_progress" | "dismissed" | "completed";
+type OnboardingIntake = "gmail" | "outlook" | "upload";
+
+function onboardingResponse(onboarding?: {
+  status?: OnboardingStatus;
+  intake?: OnboardingIntake | null;
+  startedAt?: Date | null;
+  dismissedAt?: Date | null;
+  completedAt?: Date | null;
+} | null) {
+  return {
+    status: onboarding?.status ?? "in_progress",
+    intake: onboarding?.intake ?? undefined,
+    startedAt: onboarding?.startedAt ?? undefined,
+    dismissedAt: onboarding?.dismissedAt ?? undefined,
+    completedAt: onboarding?.completedAt ?? undefined,
+  };
+}
+
 export function startGoogleLogin(_request: Request, response: Response) {
   const url = googleClient.generateAuthUrl({ access_type: "offline", scope: ["openid", "email", "profile"], prompt: "select_account" });
   return response.redirect(url);
@@ -28,6 +47,7 @@ export async function completeMicrosoftLogin(request: Request, response: Respons
   const result = await client.acquireTokenByCode({ code, scopes: ["openid", "profile", "email", "User.Read", "Mail.Read", "offline_access"], redirectUri: env.MICROSOFT_AUTH_CALLBACK_URL });
   if (!result.account?.username || !result.account.homeAccountId) return response.status(400).send("Microsoft did not return a usable profile.");
   let user = await UserModel.findOne({ $or: [{ microsoftId: result.account.homeAccountId }, { email: result.account.username.toLowerCase() }] });
+  const isNewUser = !user;
   if (!user) {
     const baseUsername = result.account.username.split("@")[0].toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 18) || "analyst";
     let username = baseUsername;
@@ -37,7 +57,7 @@ export async function completeMicrosoftLogin(request: Request, response: Respons
   } else { user.microsoftId = result.account.homeAccountId; await user.save(); }
   request.session.userId = user._id.toString();
   delete request.session.microsoftAuthState;
-  return response.redirect(`${env.FRONTEND_ORIGIN}/dashboard`);
+  return response.redirect(`${env.FRONTEND_ORIGIN}/${isNewUser ? "onboarding" : "dashboard"}`);
 }
 
 export async function completeGoogleLogin(request: Request, response: Response) {
@@ -48,6 +68,7 @@ export async function completeGoogleLogin(request: Request, response: Response) 
   const profile = ticket.getPayload();
   if (!profile?.sub || !profile.email) return response.status(400).send("Google did not return a usable profile.");
   let user = await UserModel.findOne({ $or: [{ googleId: profile.sub }, { email: profile.email.toLowerCase() }] });
+  const isNewUser = !user;
   if (user) {
     user.googleId = profile.sub;
     user.name = user.name || profile.name || profile.email;
@@ -57,7 +78,7 @@ export async function completeGoogleLogin(request: Request, response: Response) 
     user = await UserModel.create({ googleId: profile.sub, email: profile.email, username: profile.email.split("@")[0], name: profile.name ?? profile.email, avatarUrl: profile.picture, emailVerified: true });
   }
   request.session.userId = user._id.toString();
-  return response.redirect(`${env.FRONTEND_ORIGIN}/dashboard`);
+  return response.redirect(`${env.FRONTEND_ORIGIN}/${isNewUser ? "onboarding" : "dashboard"}`);
 }
 
 export async function register(request: Request, response: Response) {
@@ -88,9 +109,38 @@ export async function login(request: Request, response: Response) {
 
 export async function getCurrentUser(request: Request, response: Response) {
   if (!request.session.userId) return response.status(401).json({ error: "Authentication required." });
-  const user = await UserModel.findById(request.session.userId).select("email name username avatarUrl emailVerified googleId microsoftId").lean();
+  const user = await UserModel.findById(request.session.userId).select("email name username avatarUrl emailVerified googleId microsoftId onboarding").lean();
   if (!user) return response.status(401).json({ error: "Authentication required." });
-  return response.json(user);
+  return response.json({ ...user, onboarding: onboardingResponse(user.onboarding) });
+}
+
+export async function getOnboarding(request: Request, response: Response) {
+  const user = await UserModel.findById(request.session.userId).select("onboarding").lean();
+  if (!user) return response.status(401).json({ error: "Authentication required." });
+  return response.json(onboardingResponse(user.onboarding));
+}
+
+export async function updateOnboarding(request: Request, response: Response) {
+  const { status, intake } = request.body as Record<string, unknown>;
+  const updates: Record<string, unknown> = {};
+  if (status !== undefined) {
+    if (status !== "in_progress" && status !== "dismissed" && status !== "completed") {
+      return response.status(400).json({ error: "Provide a valid onboarding status." });
+    }
+    updates["onboarding.status"] = status;
+    if (status === "dismissed") updates["onboarding.dismissedAt"] = new Date();
+    if (status === "completed") updates["onboarding.completedAt"] = new Date();
+  }
+  if (intake !== undefined) {
+    if (intake !== "gmail" && intake !== "outlook" && intake !== "upload") {
+      return response.status(400).json({ error: "Provide a valid intake method." });
+    }
+    updates["onboarding.intake"] = intake;
+  }
+  if (!Object.keys(updates).length) return response.status(400).json({ error: "Provide an onboarding update." });
+  const user = await UserModel.findByIdAndUpdate(request.session.userId, { $set: updates }, { new: true, runValidators: true }).select("onboarding").lean();
+  if (!user) return response.status(404).json({ error: "User not found." });
+  return response.json(onboardingResponse(user.onboarding));
 }
 
 export async function updateProfile(request: Request, response: Response) {
@@ -103,17 +153,17 @@ export async function updateProfile(request: Request, response: Response) {
     const conflict = await UserModel.findOne({ username: updates.username, _id: { $ne: request.session.userId } }).lean();
     if (conflict) return response.status(409).json({ error: "That username is already taken." });
   }
-  const user = await UserModel.findByIdAndUpdate(request.session.userId, updates, { new: true }).select("email name username avatarUrl emailVerified googleId microsoftId").lean();
+  const user = await UserModel.findByIdAndUpdate(request.session.userId, updates, { new: true }).select("email name username avatarUrl emailVerified googleId microsoftId onboarding").lean();
   if (!user) return response.status(404).json({ error: "User not found." });
-  return response.json(user);
+  return response.json({ ...user, onboarding: onboardingResponse(user.onboarding) });
 }
 
 export async function updateAvatar(request: Request, response: Response) {
   if (!request.file) return response.status(400).json({ error: "An image file is required." });
   const uploaded = await uploadAvatar(request.file.buffer, request.session.userId!);
-  const user = await UserModel.findByIdAndUpdate(request.session.userId, { avatarUrl: uploaded.secureUrl }, { new: true }).select("email name username avatarUrl emailVerified googleId microsoftId").lean();
+  const user = await UserModel.findByIdAndUpdate(request.session.userId, { avatarUrl: uploaded.secureUrl }, { new: true }).select("email name username avatarUrl emailVerified googleId microsoftId onboarding").lean();
   if (!user) return response.status(404).json({ error: "User not found." });
-  return response.json(user);
+  return response.json({ ...user, onboarding: onboardingResponse(user.onboarding) });
 }
 
 export function logout(request: Request, response: Response, next: (error?: unknown) => void) {

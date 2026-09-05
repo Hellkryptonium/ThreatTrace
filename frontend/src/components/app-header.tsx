@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ProfileMenu } from "./profile-menu";
@@ -22,9 +22,24 @@ const navItems = [
   { href: "/connections", label: "Connections", icon: "sync_alt" },
 ];
 
+const primaryNavItems = navItems.filter((item) => item.href !== "/connections");
+const secondaryNavItems = navItems.filter((item) => item.href === "/connections");
+
 export function AppHeader({ user, actionHref = "/analyze/upload", actionLabel = "+ New Scan" }: AppHeaderProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function closeMoreMenu(event: MouseEvent) {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) setMoreOpen(false);
+    }
+    document.addEventListener("mousedown", closeMoreMenu);
+    return () => document.removeEventListener("mousedown", closeMoreMenu);
+  }, []);
+
+  const isActive = (href: string) => pathname === href || (href !== "/dashboard" && pathname?.startsWith(href));
 
   return (
     <header className={styles.header}>
@@ -43,13 +58,13 @@ export function AppHeader({ user, actionHref = "/analyze/upload", actionLabel = 
 
         {/* Desktop Navigation */}
         <nav className={styles.primaryNav} aria-label="Workspace navigation">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname?.startsWith(item.href));
+          {primaryNavItems.map((item) => {
+            const itemIsActive = isActive(item.href);
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`${styles.navLink} ${isActive ? styles.navLinkActive : ""}`}
+                className={`${styles.navLink} ${itemIsActive ? styles.navLinkActive : ""}`}
               >
                 <span className={`material-symbols-outlined ${styles.navIcon}`}>{item.icon}</span>
                 <span>{item.label}</span>
@@ -57,6 +72,28 @@ export function AppHeader({ user, actionHref = "/analyze/upload", actionLabel = 
               </Link>
             );
           })}
+          <div className={styles.moreNav} ref={moreMenuRef}>
+            <button
+              type="button"
+              className={`${styles.navLink} ${secondaryNavItems.some((item) => isActive(item.href)) ? styles.navLinkActive : ""}`}
+              aria-expanded={moreOpen}
+              aria-haspopup="menu"
+              onClick={() => setMoreOpen((open) => !open)}
+            >
+              <span className={`material-symbols-outlined ${styles.navIcon}`}>more_horiz</span>
+              <span>More</span>
+            </button>
+            {moreOpen && (
+              <div className={styles.moreMenu} role="menu">
+                {secondaryNavItems.map((item) => (
+                  <Link key={item.href} href={item.href} role="menuitem" className={styles.moreMenuItem} onClick={() => setMoreOpen(false)}>
+                    <span className={`material-symbols-outlined ${styles.moreMenuIcon}`}>{item.icon}</span>
+                    <span>{item.label}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
         </nav>
 
         {/* Right Actions */}
@@ -89,13 +126,13 @@ export function AppHeader({ user, actionHref = "/analyze/upload", actionLabel = 
         <div className={styles.mobileDrawer}>
           <nav className={styles.mobileNav} aria-label="Mobile workspace navigation">
             {navItems.map((item) => {
-              const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname?.startsWith(item.href));
+              const itemIsActive = isActive(item.href);
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={() => setMobileOpen(false)}
-                  className={`${styles.mobileNavLink} ${isActive ? styles.mobileNavLinkActive : ""}`}
+                  className={`${styles.mobileNavLink} ${itemIsActive ? styles.mobileNavLinkActive : ""}`}
                 >
                   <span className={`material-symbols-outlined ${styles.mobileNavIcon}`}>{item.icon}</span>
                   <span>{item.label}</span>

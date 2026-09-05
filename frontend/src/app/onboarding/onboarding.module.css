@@ -1,0 +1,26 @@
+.page { min-height: 100vh; padding: 22px clamp(20px, 5vw, 72px) 56px; background: radial-gradient(circle at 92% 8%, #dcefea 0, transparent 25rem), var(--cream); }
+.header { display: flex; align-items: center; justify-content: space-between; max-width: 1120px; margin: 0 auto; }
+.brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink-deep); font: 800 12px var(--font-body), sans-serif; letter-spacing: .13em; text-decoration: none; }
+.brand span { display: grid; width: 28px; height: 28px; place-items: center; border-radius: 7px; background: var(--ink-deep); color: #bceadd; font: 700 15px Georgia, serif; letter-spacing: 0; }
+.skip { border: 0; padding: 8px; background: transparent; color: var(--muted); font-size: 12px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.skip:focus-visible, .choice button:focus-visible, .complete button:focus-visible { outline: 3px solid #8dc7c0; outline-offset: 3px; }
+.shell { max-width: 1120px; margin: 74px auto 0; }
+.intro { max-width: 690px; }
+.intro h1 { margin: 11px 0 16px; color: var(--ink-deep); font: 400 clamp(42px, 5vw, 66px)/.99 var(--font-headline), Georgia, serif; letter-spacing: -.045em; }
+.intro h1 em { color: var(--teal); font-style: normal; }
+.intro > p:last-child { max-width: 590px; margin: 0; color: var(--muted); font-size: 15px; line-height: 1.6; }
+.progress { display: flex; gap: 0; margin: 42px 0 20px; overflow: hidden; border: 1px solid var(--line); border-radius: 7px; background: #fff; }
+.progress span { flex: 1; padding: 11px 15px; color: var(--muted); font: 700 10px Consolas, monospace; letter-spacing: .06em; text-transform: uppercase; }
+.progress span + span { border-left: 1px solid var(--line); }.progress .active { background: var(--ink-deep); color: #fff; }.progress .done { background: #e2f3ef; color: var(--teal); }
+.choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+.choice { display: flex; min-height: 306px; flex-direction: column; align-items: flex-start; padding: 23px; border: 1px solid var(--line); border-radius: 12px; background: rgba(255, 255, 255, .92); transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+.choice:hover, .selected { transform: translateY(-3px); border-color: #75bcb2; box-shadow: 0 12px 26px rgba(23, 37, 43, .09); }.selected { background: #f3fbf9; }
+.icon { display: grid; width: 36px; height: 36px; place-items: center; margin-bottom: 21px; border-radius: 9px; background: #e5f4f1; color: var(--teal); font: 700 16px Georgia, serif; }
+.choice h2, .complete h2 { margin: 7px 0 9px; color: var(--ink-deep); font: 400 25px/1.12 var(--font-headline), Georgia, serif; letter-spacing: -.02em; text-transform: none; }
+.choice > p:not(.kicker), .complete p:not(.kicker) { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
+.choice button, .complete button, .inboxAction { width: 100%; margin-top: auto; border: 0; border-radius: 7px; padding: 11px 13px; background: var(--ink-deep); color: #fff; font-size: 12px; font-weight: 700; text-align: left; cursor: pointer; text-decoration: none; }.choice button:hover, .complete button:hover, .inboxAction:hover { background: var(--teal); }.choice button:disabled, .complete button:disabled, .skip:disabled { opacity: .6; cursor: wait; }.choice button span { float: right; }
+.note { display: flex; gap: 12px; margin-top: 19px; padding: 14px 16px; border-left: 3px solid var(--teal); color: var(--muted); background: rgba(255,255,255,.58); font-size: 12px; line-height: 1.5; }.note strong { color: var(--ink-deep); white-space: nowrap; }
+.complete { display: grid; grid-template-columns: auto 1fr 150px; align-items: center; gap: 20px; padding: 30px; border: 1px solid #afd9d2; border-radius: 12px; background: #f4fbfa; }.complete button, .inboxAction { margin: 0; text-align: center; }.check { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 50%; background: var(--teal); color: #fff; font-size: 23px; }
+.error { margin: 0 0 18px; padding: 12px 14px; border-radius: 7px; background: #fce8e6; color: var(--red); font-size: 12px; }
+@media (max-width: 780px) { .shell { margin-top: 50px; }.choices { grid-template-columns: 1fr; }.choice { min-height: 230px; }.complete { grid-template-columns: auto 1fr; }.complete button { grid-column: 1 / -1; }.progress span { padding: 10px 8px; font-size: 9px; } }
+@media (max-width: 480px) { .page { padding-inline: 18px; }.header { align-items: flex-start; }.shell { margin-top: 38px; }.intro h1 { font-size: 42px; }.note { display: grid; gap: 4px; }.complete { padding: 21px; gap: 13px; } }

@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import { env } from "../config/env.js";
 import { createInvestigation } from "../services/analysis/create-investigation.service.js";
 import { createMicrosoftClient, fetchOutlookEmail, getOutlookAuthorizationUrl, getOutlookStatus, listOutlookMessages, saveOutlookAccount } from "../services/outlook/outlook.service.js";
+import { completeOnboardingForUser } from "../services/onboarding/onboarding.service.js";
 
 export async function connectOutlook(request: Request, response: Response) {
   const state = crypto.randomUUID();
@@ -34,5 +35,6 @@ export async function analyzeOutlookMessage(request: Request, response: Response
   if (!messageId) return response.status(400).json({ error: "An Outlook message ID is required." });
   const normalized = await fetchOutlookEmail(request.session.userId!, messageId);
   const result = await createInvestigation(normalized, request.session.userId!, "OUTLOOK", messageId);
+  await completeOnboardingForUser(request.session.userId!);
   return response.status(201).json(result);
 }

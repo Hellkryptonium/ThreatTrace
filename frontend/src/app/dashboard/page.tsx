@@ -8,6 +8,7 @@ import { getCurrentUser, type CurrentUser } from "@/lib/api/auth";
 import { listSavedEmails, type SavedEmail } from "@/lib/api/saved-emails";
 import { getGmailStatus, type GmailStatus } from "@/lib/api/gmail";
 import { getOutlookStatus, type OutlookStatus } from "@/lib/api/outlook";
+import { OnboardingChecklist } from "@/components/onboarding/onboarding-checklist";
 import styles from "./dashboard.module.css";
 
 export default function DashboardPage() {
@@ -50,7 +51,7 @@ export default function DashboardPage() {
     (email) => email.riskScore !== undefined && email.riskScore >= 60,
   );
   const attention = emails.filter(
-    (email) => email.riskScore !== undefined && email.riskScore >= 30,
+    (email) => email.riskScore !== undefined && email.riskScore >= 30 && email.riskScore < 60,
   );
   const connected = [gmail?.connected, outlook?.connected].filter(
     Boolean,
@@ -88,9 +89,9 @@ export default function DashboardPage() {
           <small>saved findings</small>
         </article>
         <article>
-          <span>NEEDS REVIEW</span>
+          <span>MEDIUM RISK</span>
           <strong>{attention.length}</strong>
-          <small>medium and above</small>
+          <small>needs review</small>
         </article>
         <article>
           <span>ANALYZED</span>
@@ -103,6 +104,7 @@ export default function DashboardPage() {
           <small>mailboxes connected</small>
         </article>
       </section>
+      <OnboardingChecklist onboarding={user?.onboarding} mailboxConnected={connected > 0} investigationCount={emails.length} />
       <section className={styles.grid}>
         <section className={styles.panel}>
           <div className={styles.panelHead}>

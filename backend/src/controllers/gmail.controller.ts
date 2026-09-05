@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import { env } from "../config/env.js";
 import { createGoogleClient, fetchGmailEmail, getGmailProfile, getGmailStatus, listGmailMessages, saveGmailAccount } from "../services/gmail/gmail.service.js";
 import { createInvestigation } from "../services/analysis/create-investigation.service.js";
+import { completeOnboardingForUser } from "../services/onboarding/onboarding.service.js";
 
 export function connectGmail(request: Request, response: Response) {
   const state = crypto.randomUUID();
@@ -47,5 +48,6 @@ export async function analyzeGmailMessage(request: Request, response: Response) 
   if (!messageId) return response.status(400).json({ error: "A Gmail message ID is required." });
   const normalized = await fetchGmailEmail(request.session.userId!, messageId);
   const result = await createInvestigation(normalized, request.session.userId!, "GMAIL", messageId);
+  await completeOnboardingForUser(request.session.userId!);
   return response.status(201).json(result);
 }
