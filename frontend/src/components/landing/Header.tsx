@@ -24,8 +24,8 @@ export function Header() {
           </nav>
         </div>
         <div className="flex items-center gap-4">
-          <Link href="/analyze/upload" className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-gradient-to-r from-primary to-primary-container text-on-primary text-xs font-label font-semibold tracking-wide transition-opacity hover:opacity-95 shadow-[0_2px_8px_rgba(9,76,178,0.2)]">
-            <span className="material-symbols-outlined text-[16px]">add</span>
+          <Link href="/analyze/upload" className="btn-shimmer-wrap group flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-gradient-to-r from-primary to-primary-container text-on-primary text-xs font-label font-semibold tracking-wide transition-all duration-300 hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 shadow-[0_2px_8px_rgba(9,76,178,0.2)]">
+            <span className="material-symbols-outlined text-[16px] transition-transform duration-300 group-hover:rotate-90">add</span>
             <span>Scan an Email</span>
           </Link>
         </div>

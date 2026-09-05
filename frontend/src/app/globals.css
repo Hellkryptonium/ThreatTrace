@@ -1,5 +1,59 @@
 @import "tailwindcss";
 
+@theme {
+  --font-headline: "Noto Serif", serif;
+  --font-display: "Noto Serif", serif;
+  --font-body: "Inter", sans-serif;
+  --font-label: "Public Sans", sans-serif;
+
+  --color-on-tertiary-fixed-variant: #524600;
+  --color-surface-dim: #dbdadb;
+  --color-on-primary-container: #e7ebff;
+  --color-surface-tint: #2259bf;
+  --color-inverse-primary: #b1c5ff;
+  --color-surface-container-lowest: #ffffff;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #3366cc;
+  --color-on-secondary-container: #606569;
+  --color-primary-fixed: #d9e2ff;
+  --color-on-surface-variant: #434653;
+  --color-on-primary-fixed-variant: #00419d;
+  --color-on-secondary-fixed: #171c20;
+  --color-outline: #737784;
+  --color-error-container: #ffdad6;
+  --color-surface: #faf9fa;
+  --color-on-tertiary: #ffffff;
+  --color-surface-variant: #e3e2e3;
+  --color-secondary-container: #dfe3e8;
+  --color-tertiary-fixed-dim: #dcc661;
+  --color-primary-fixed-dim: #b1c5ff;
+  --color-surface-container: #efedee;
+  --color-surface-container-low: #f5f3f4;
+  --color-primary: #094cb2;
+  --color-surface-container-high: #e9e8e9;
+  --color-tertiary-container: #bfab49;
+  --color-inverse-surface: #303031;
+  --color-on-error-container: #93000a;
+  --color-error: #ba1a1a;
+  --color-secondary: #5a5f63;
+  --color-secondary-fixed: #dfe3e8;
+  --color-tertiary: #6d5e00;
+  --color-tertiary-fixed: #f9e37a;
+  --color-surface-container-highest: #e3e2e3;
+  --color-on-surface: #1b1c1d;
+  --color-on-error: #ffffff;
+  --color-on-background: #1b1c1d;
+  --color-on-primary-fixed: #001946;
+  --color-on-secondary: #ffffff;
+  --color-inverse-on-surface: #f2f0f1;
+  --color-secondary-fixed-dim: #c2c7cc;
+  --color-on-secondary-fixed-variant: #42474b;
+  --color-on-tertiary-fixed: #211b00;
+  --color-surface-bright: #faf9fa;
+  --color-on-tertiary-container: #4a3f00;
+  --color-background: #faf9fa;
+  --color-outline-variant: #c3c6d5;
+}
 :root {
   --paper: #fbfaf6;
   --surface: #fff;
@@ -18,16 +72,197 @@
   --cream: #fbfaf6;
 }
 
-* { box-sizing: border-box; }
-html, body { min-height: 100%; }
-body { margin: 0; background: var(--cream); color: var(--ink); font-family: "Trebuchet MS", "Segoe UI", sans-serif; }
-button, input { font: inherit; }
-h1, h2, h3, p { margin-top: 0; }
-.kicker, .brand { color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: .14em; }
-h2 { color: var(--muted); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; margin: 0 0 18px; }
-.mono, code { color: var(--muted); font: 12px Consolas, monospace; }
-.muted { color: var(--muted); }
-.error { color: var(--red); background: #fce8e6; padding: 13px 16px; border-radius: 4px; }
-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 72px; border-top: 1px solid var(--line); padding-top: 16px; color: var(--muted); font-size: 12px; }
-footer a { color: var(--blue); text-decoration: none; }
-@media (max-width: 700px) { footer { gap: 16px; align-items: flex-start; flex-direction: column; } }
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  min-height: 100%;
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+}
+
+button, input {
+  font: inherit;
+}
+
+h1, h2, h3, p {
+  margin-top: 0;
+}
+
+.kicker, .brand {
+  color: var(--blue);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .14em;
+}
+
+h2 {
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin: 0 0 18px;
+}
+
+.mono, code {
+  color: var(--muted);
+  font: 12px Consolas, monospace;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.error {
+  color: var(--red);
+  background: #fce8e6;
+  padding: 13px 16px;
+  border-radius: 4px;
+}
+
+footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 72px;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+footer a {
+  color: var(--blue);
+  text-decoration: none;
+}
+
+@media (max-width: 700px) {
+  footer {
+    gap: 16px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+/* Custom motion styling and animations */
+@keyframes floatGentle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes sweepBeam {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.7;
+  }
+  85% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateY(380%);
+    opacity: 0;
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+  }
+}
+
+@keyframes meterStroke {
+  from {
+    stroke-dasharray: 0, 100;
+  }
+  to {
+    stroke-dasharray: 88, 100;
+  }
+}
+
+@keyframes shimmerPass {
+  0% {
+    transform: translateX(-100%) rotate(25deg);
+  }
+  100% {
+    transform: translateX(250%) rotate(25deg);
+  }
+}
+
+@keyframes ambientDrift {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-48%, -52%) scale(1.08);
+  }
+}
+
+.hero-card-float {
+  animation: floatGentle 7s ease-in-out infinite;
+}
+
+.ambient-glow-drift {
+  animation: ambientDrift 14s ease-in-out infinite;
+}
+
+.radar-sweep-beam {
+  animation: sweepBeam 3.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.risk-meter-circle {
+  stroke-dasharray: 88, 100;
+  animation: meterStroke 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.btn-shimmer-wrap {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-shimmer-wrap::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 20%;
+  height: 200%;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: rotate(25deg);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.btn-shimmer-wrap:hover::after {
+  opacity: 1;
+  animation: shimmerPass 1.4s ease-in-out infinite;
+}
+
+.feature-card-hover {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.feature-card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.08);
+}

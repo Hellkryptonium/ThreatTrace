@@ -18,20 +18,20 @@ export function Footer() {
           <div>
             <h4 className="font-label text-xs font-semibold tracking-wider uppercase text-tertiary mb-4">Overview</h4>
             <ul className="space-y-2.5 font-label text-xs">
-              <li><Link href="/" className="text-on-surface-variant hover:text-on-surface transition-colors">Home Overview</Link></li>
-              <li><Link href="/analyze/upload" className="text-on-surface-variant hover:text-on-surface transition-colors">Scan an Email</Link></li>
-              <li><Link href="/" className="text-on-surface-variant hover:text-on-surface transition-colors">Recent Scanned Emails</Link></li>
-              <li><Link href="/" className="text-on-surface-variant hover:text-on-surface transition-colors">Latest Scam Alerts</Link></li>
+              <li><Link href="/" className="text-on-surface-variant hover:text-primary transition-colors">Home Overview</Link></li>
+              <li><Link href="/analyze/upload" className="text-on-surface-variant hover:text-primary transition-colors">Scan an Email</Link></li>
+              <li><Link href="/" className="text-on-surface-variant hover:text-primary transition-colors">Recent Scanned Emails</Link></li>
+              <li><Link href="/" className="text-on-surface-variant hover:text-primary transition-colors">Latest Scam Alerts</Link></li>
             </ul>
           </div>
           
           <div>
             <h4 className="font-label text-xs font-semibold tracking-wider uppercase text-tertiary mb-4">Safety Guides</h4>
             <ul className="space-y-2.5 font-label text-xs">
-              <li><Link href="/safety-guides" className="text-on-surface-variant hover:text-on-surface transition-colors">How to Spot a Phishing Email</Link></li>
-              <li><Link href="/safety-guides" className="text-on-surface-variant hover:text-on-surface transition-colors">Protecting Your Bank Accounts</Link></li>
-              <li><Link href="/safety-guides" className="text-on-surface-variant hover:text-on-surface transition-colors">What to Do if You Clicked a Link</Link></li>
-              <li><Link href="/safety-guides" className="text-on-surface-variant hover:text-on-surface transition-colors">Family Safety Checklist</Link></li>
+              <li><Link href="/safety-guides" className="text-on-surface-variant hover:text-primary transition-colors">How to Spot a Phishing Email</Link></li>
+              <li><Link href="/safety-guides" className="text-on-surface-variant hover:text-primary transition-colors">Protecting Your Bank Accounts</Link></li>
+              <li><Link href="/safety-guides" className="text-on-surface-variant hover:text-primary transition-colors">What to Do if You Clicked a Link</Link></li>
+              <li><Link href="/safety-guides" className="text-on-surface-variant hover:text-primary transition-colors">Family Safety Checklist</Link></li>
             </ul>
           </div>
           
@@ -57,9 +57,9 @@ export function Footer() {
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 font-label text-xs text-on-surface-variant">
           <p>© 2025 ThreatTrace Security. Simple, private protection for everyday inboxes.</p>
           <div className="flex items-center gap-6">
-            <Link href="/" className="hover:text-on-surface transition-colors">Privacy Commitment</Link>
-            <Link href="/" className="hover:text-on-surface transition-colors">How We Protect Your Data</Link>
-            <Link href="/" className="hover:text-on-surface transition-colors">Help & Support</Link>
+            <Link href="/" className="hover:text-primary transition-colors">Privacy Commitment</Link>
+            <Link href="/" className="hover:text-primary transition-colors">How We Protect Your Data</Link>
+            <Link href="/" className="hover:text-primary transition-colors">Help & Support</Link>
           </div>
         </div>
       </div>
