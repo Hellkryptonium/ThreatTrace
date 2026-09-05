@@ -2,6 +2,7 @@ import request from "supertest";
 import { describe, expect, it } from "vitest";
 import { createApp } from "../src/app.js";
 import { AnalysisModel } from "../src/models/Analysis.js";
+import { UserModel } from "../src/models/User.js";
 
 const app = createApp();
 
@@ -40,5 +41,11 @@ describe("ThreatTrace API", () => {
     expect(AnalysisModel.schema.path("relayPath")).toBeDefined();
     expect(AnalysisModel.schema.path("assessmentNote")).toBeDefined();
     expect(AnalysisModel.schema.path("probableOriginIp")).toBeDefined();
+  });
+
+  it("persists a resumable onboarding state on users", () => {
+    expect(UserModel.schema.path("onboarding.status")).toBeDefined();
+    expect(UserModel.schema.path("onboarding.intake")).toBeDefined();
+    expect(UserModel.schema.path("onboarding.completedAt")).toBeDefined();
   });
 });

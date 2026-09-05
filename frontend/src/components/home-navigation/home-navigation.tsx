@@ -16,7 +16,7 @@ export function HomeNavigation() {
 
   return <nav className={styles.nav} aria-label="Primary navigation">
     <Link href="/" className={styles.brand}><span className={styles.brandMark}>T</span><span className={styles.brandText}><strong>THREATTRACE</strong><small>EVIDENCE-FIRST SECURITY</small></span></Link>
-    <div className={styles.navLinks}><Link href="#capabilities">Capabilities</Link><Link href="/safety-guides">Safety guides</Link></div>
+    <div className={styles.navLinks}><Link href="#capabilities">Capabilities</Link><Link href="#safety-guides">Safety guides</Link></div>
     {checked && (user ? <div className={styles.loggedIn}><Link href="/dashboard" className={styles.workspace}>Open workspace</Link><ProfileMenu user={user} /></div> : <div className={styles.navActions}><Link href="/login" className={styles.login}>Sign in</Link><Link href="/register" className={styles.register}>Create account</Link></div>)}
   </nav>;
 }

@@ -7,12 +7,14 @@ import { deleteArchivedEmail, getPrivateEmailUrl } from "../services/storage/clo
 import { EmailModel } from "../models/Email.js";
 import { AnalysisModel } from "../models/Analysis.js";
 import { InvestigationModel } from "../models/Investigation.js";
+import { completeOnboardingForUser } from "../services/onboarding/onboarding.service.js";
 
 export async function uploadEmail(request: Request, response: Response) {
   if (!request.file) return response.status(400).json({ error: "A valid .eml file is required." });
   const normalized = await parseEml(request.file.buffer);
   if (!normalized.sender.email) return response.status(422).json({ error: "The email has no usable sender address." });
   const result = await createInvestigation(normalized, request.session.userId!, "EML");
+  await completeOnboardingForUser(request.session.userId!);
   try {
     const cloudinary = await archiveEmail(request.file.buffer, request.session.userId!, result.emailId);
     if (cloudinary) await EmailModel.updateOne({ _id: result.emailId, userId: request.session.userId }, { $set: { cloudinary } });

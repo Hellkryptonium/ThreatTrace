@@ -11,8 +11,9 @@
 }
 
 .headerInner {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: max-content max-content max-content;
+  justify-content: start;
   align-items: center;
   max-width: 1180px;
   margin: 0 auto;
@@ -94,6 +95,52 @@
   padding: 4px 6px;
   border-radius: 9999px;
   border: 1px solid rgba(220, 226, 222, 0.7);
+  min-width: 0;
+}
+
+.moreNav {
+  position: relative;
+}
+
+.moreNav > button {
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.moreMenu {
+  position: absolute;
+  z-index: 60;
+  top: calc(100% + 10px);
+  left: 0;
+  display: grid;
+  min-width: 178px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 14px 30px rgba(23, 37, 43, .12);
+}
+
+.moreMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 10px;
+  border-radius: 6px;
+  color: var(--ink-deep);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.moreMenuItem:hover {
+  background: var(--teal-soft);
+  color: var(--teal);
+}
+
+.moreMenuIcon {
+  font-size: 17px !important;
 }
 
 .navLink {
@@ -257,12 +304,25 @@
 
 /* Responsive Breakpoints */
 @media (max-width: 1024px) {
+  .headerInner {
+    gap: 12px;
+  }
+  .navLink {
+    padding-inline: 9px;
+  }
   .navLink span:nth-child(2) {
     font-size: 11.5px;
   }
+  .profileCopy {
+    display: none;
+  }
 }
 
-@media (max-width: 860px) {
+@media (max-width: 1200px) {
+  .headerInner {
+    display: flex;
+    justify-content: space-between;
+  }
   .primaryNav {
     display: none;
   }

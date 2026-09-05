@@ -17,7 +17,7 @@ export default function RegisterPage() {
     event.preventDefault(); setError("");
     if (form.password !== form.confirmPassword) { setError("Passwords do not match."); return; }
     setBusy(true);
-    try { await registerAccount({ name: form.name, email: form.email, username: form.username, password: form.password }); router.replace("/dashboard"); }
+    try { await registerAccount({ name: form.name, email: form.email, username: form.username, password: form.password }); router.replace("/onboarding"); }
     catch (reason) { setError(reason instanceof Error ? reason.message : "Registration failed."); setBusy(false); }
   }
 
@@ -33,7 +33,7 @@ export default function RegisterPage() {
       <label className={styles.field}>CONFIRM PASSWORD<input required minLength={8} type="password" value={form.confirmPassword} onChange={(event) => update("confirmPassword", event.target.value)} autoComplete="new-password" /></label>
       <button className={styles.submit} disabled={busy}>{busy ? "Creating account..." : "Create account"}</button>
     </form>
-    <div className={styles.divider}>OR</div><a className={styles.googleButton} href={googleLoginUrl()}><span>G</span> Continue with Google</a><a className={styles.microsoftButton} href={microsoftLoginUrl()}><span>□</span> Continue with Microsoft</a>
+    <div className={styles.divider}>OR</div><a className={styles.googleButton} href={googleLoginUrl()}><span>G</span> Continue with Google</a><a className={styles.microsoftButton} href={microsoftLoginUrl()}><span>M</span> Continue with Microsoft</a>
     <p className={styles.loginLink}>Already have an account? <Link href="/login">Sign in</Link></p>
   </section></main>;
 }
