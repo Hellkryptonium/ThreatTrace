@@ -3,6 +3,7 @@ import express from "express";
 import helmet from "helmet";
 import session from "express-session";
 import MongoStore from "connect-mongo";
+
 import { env } from "./config/env.js";
 import { emailRouter } from "./routes/email.routes.js";
 import { investigationRouter } from "./routes/investigation.routes.js";
@@ -14,17 +15,64 @@ import { copilotRouter } from "./routes/copilot.routes.js";
 
 export function createApp() {
   const app = express();
+
+  // Render runs the app behind a proxy.
+  // This allows Express to correctly handle secure cookies over HTTPS.
+  app.set("trust proxy", 1);
+
   app.use(helmet());
-  app.use(cors({ origin: env.FRONTEND_ORIGIN, credentials: true }));
-  app.use(session({ secret: env.SESSION_SECRET, store: MongoStore.create({ mongoUrl: env.MONGODB_URI, collectionName: "sessions" }), resave: false, saveUninitialized: false, cookie: { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 1000 * 60 * 60 * 24 * 7 } }));
+
+  // Allow the deployed frontend to make credentialed requests
+  // to this backend.
+  app.use(
+    cors({
+      origin: env.FRONTEND_ORIGIN,
+      credentials: true,
+    })
+  );
+
+  // Store sessions in MongoDB.
+  app.use(
+    session({
+      secret: env.SESSION_SECRET,
+
+      store: MongoStore.create({
+        mongoUrl: env.MONGODB_URI,
+        collectionName: "sessions",
+      }),
+
+      resave: false,
+      saveUninitialized: false,
+
+      cookie: {
+        httpOnly: true,
+
+        // Required because the frontend and backend are on
+        // different sites in production.
+        sameSite: "none",
+
+        // Required for SameSite=None cookies.
+        secure: true,
+
+        maxAge: 1000 * 60 * 60 * 24 * 7,
+      },
+    })
+  );
+
   app.use(express.json());
-  app.get("/health", (_request, response) => response.json({ status: "ok" }));
+
+  app.get("/health", (_request, response) =>
+    response.json({ status: "ok" })
+  );
+
   app.use("/api/v1/auth", authRouter);
   app.use("/api/v1/gmail", gmailRouter);
   app.use("/api/v1/outlook", outlookRouter);
   app.use("/api/v1/emails", emailRouter);
   app.use("/api/v1/investigations", investigationRouter);
   app.use("/api/v1/copilot", copilotRouter);
+
   app.use(errorHandler);
+
   return app;
 }
