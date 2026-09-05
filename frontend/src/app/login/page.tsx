@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [busy, setBusy] = useState(false);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setError(""); setBusy(true);
-    try { await loginAccount({ identifier, password }); router.replace("/analyze/upload"); }
+    try { await loginAccount({ identifier, password }); router.replace("/dashboard"); }
     catch (reason) { setError(reason instanceof Error ? reason.message : "Login failed."); setBusy(false); }
   }
   return (
@@ -34,7 +34,7 @@ export default function LoginPage() {
         <a className={styles.googleButton} href={googleLoginUrl()}>
           <span>G</span> Continue with Google
         </a>
-        <a className={styles.microsoftButton} href={microsoftLoginUrl()}><span>□</span> Continue with Microsoft</a>
+        <a className={styles.microsoftButton} href={microsoftLoginUrl()}><span>M</span> Continue with Microsoft</a>
         <small>Google authentication is handled securely by the ThreatTrace API.</small>
         <p className={styles.registerLink}>New to ThreatTrace? <Link href="/register">Create an account</Link></p>
       </section>

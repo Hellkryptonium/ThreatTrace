@@ -10,6 +10,7 @@ import { authRouter } from "./routes/auth.routes.js";
 import { gmailRouter } from "./routes/gmail.routes.js";
 import { errorHandler } from "./middleware/error-handler.js";
 import { outlookRouter } from "./routes/outlook.routes.js";
+import { copilotRouter } from "./routes/copilot.routes.js";
 
 export function createApp() {
   const app = express();
@@ -23,6 +24,7 @@ export function createApp() {
   app.use("/api/v1/outlook", outlookRouter);
   app.use("/api/v1/emails", emailRouter);
   app.use("/api/v1/investigations", investigationRouter);
+  app.use("/api/v1/copilot", copilotRouter);
   app.use(errorHandler);
   return app;
 }

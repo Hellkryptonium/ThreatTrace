@@ -5,6 +5,8 @@ Return-Path: <mailer@untrusted.example>
 Subject: Urgent account verification
 Date: Sun, 23 Aug 2026 10:32:11 +0000
 Message-ID: <fixture-threattrace-001@example>
+Received: from edge.example.net (edge.example.net [1.1.1.1]) by mx.example.net (8.8.8.8) with ESMTP; Sun, 23 Aug 2026 10:32:09 +0000
+Received: from source.example.net (source.example.net [8.8.8.8]) by edge.example.net (1.1.1.1) with ESMTP; Sun, 23 Aug 2026 10:32:08 +0000
 Received-SPF: FAIL
 Authentication-Results: mx.example.net; spf=fail smtp.mailfrom=untrusted.example; dkim=fail header.d=untrusted.example; dmarc=fail header.from=trusted.example
 MIME-Version: 1.0

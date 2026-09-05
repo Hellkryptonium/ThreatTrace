@@ -2,7 +2,7 @@ import type { NormalizedEmail, RelayHop } from "../../types/email.js";
 
 const ipPattern = /\b(?:\d{1,3}\.){3}\d{1,3}\b/g;
 
-function isPublicIpv4(value: string): boolean {
+export function isPublicIpv4(value: string): boolean {
   const parts = value.split(".").map(Number);
   if (parts.length !== 4 || parts.some((part) => part < 0 || part > 255)) return false;
   const [first, second] = parts;

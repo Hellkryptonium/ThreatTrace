@@ -42,9 +42,23 @@ export interface RelayHop {
   ipAddresses: string[];
 }
 
+export interface IpEnrichment {
+  ip: string;
+  country?: string;
+  region?: string;
+  city?: string;
+  latitude?: number;
+  longitude?: number;
+  isp?: string;
+  organization?: string;
+  asn?: string;
+  source?: "ipwho.is";
+  retrievedAt?: string;
+}
+
 export interface EnrichmentResult {
   domains: { domain: string; dns: { addresses: string[]; mx: string[] }; rdap?: { registrar?: string; created?: string; expires?: string; status?: string[] } }[];
-  ips: { ip: string; country?: string; region?: string; city?: string; isp?: string; organization?: string; asn?: string }[];
+  ips: IpEnrichment[];
   urls: { url: string; source: string; verdict?: string; malicious?: number; suspicious?: number; permalink?: string }[];
   providers?: {
     virusTotal?: { configured: boolean; checked: number; succeeded: number; failed: number; message?: string };

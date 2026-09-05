@@ -17,7 +17,7 @@ export default function RegisterPage() {
     event.preventDefault(); setError("");
     if (form.password !== form.confirmPassword) { setError("Passwords do not match."); return; }
     setBusy(true);
-    try { await registerAccount({ name: form.name, email: form.email, username: form.username, password: form.password }); router.replace("/analyze/upload"); }
+    try { await registerAccount({ name: form.name, email: form.email, username: form.username, password: form.password }); router.replace("/dashboard"); }
     catch (reason) { setError(reason instanceof Error ? reason.message : "Registration failed."); setBusy(false); }
   }
 

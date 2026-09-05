@@ -45,7 +45,7 @@ The investigation page currently displays:
 * Attachments
 * Extracted entities
 
-Technical details are kept expandable so the main investigation remains easy to scan.
+Technical details are kept expandable so the main investigation remains easy to scan. Mail-route maps show approximate public relay infrastructure, not a sender's physical location.
 
 ---
 
@@ -55,6 +55,7 @@ Technical details are kept expandable so the main investigation remains easy to 
 * **React**
 * **TypeScript**
 * **Tailwind CSS**
+* **Mapbox GL JS** for mail-route maps
 * **Lucide React** for icons
 * REST API communication with the ThreatTrace backend
 
@@ -66,17 +67,17 @@ Planned visualization work may use React Flow for relationship graphs.
 
 ```text
 /login
-/emails
-/analyze/upload
-/investigations/[id]
-```
-
-Planned:
-
-```text
+/register
 /dashboard
-/reports
-/settings
+/emails
+/saved-emails
+/analyze/upload
+/investigations
+/investigations/[id]
+/copilot
+/connections
+/profile
+/safety-guides
 ```
 
 ---
@@ -160,6 +161,13 @@ Configure a different API location with:
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:4000
+```
+
+Configure Mapbox with a browser-restricted public token:
+
+```env
+NEXT_PUBLIC_MAPBOX_TOKEN=pk.your-public-mapbox-token
+NEXT_PUBLIC_MAPBOX_STYLE_URL=mapbox://styles/mapbox/streets-v12
 ```
 
 The frontend never directly accesses:

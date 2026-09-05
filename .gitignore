@@ -58,3 +58,5 @@ test-results/
 
 uploads/
 storage/
+!backend/src/services/storage/
+!backend/src/services/storage/**

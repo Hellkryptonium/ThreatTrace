@@ -12,6 +12,7 @@ describe("parseEml", () => {
     expect(email.recipients[0]?.email).toBe("analyst@example.net");
     expect(email.replyTo).toBe("recovery@untrusted.example");
     expect(email.headers["authentication-results"]).toContain("dmarc=fail");
+    expect(email.receivedHeaders).toHaveLength(2);
     expect(email.urls).toEqual(["http://192.0.2.10/verify", "https://bit.ly/fixture-link"]);
     expect(email.attachments[0]).toMatchObject({ filename: "invoice.txt", size: 28 });
     expect(email.attachments[0]?.sha256).toMatch(/^[a-f0-9]{64}$/);

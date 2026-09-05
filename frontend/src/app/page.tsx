@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HomeNavigation } from "@/components/home-navigation/home-navigation";
 import styles from "./home.module.css";
 
 const capabilities = [
@@ -13,11 +14,7 @@ const capabilities = [
 export default function Home() {
   return <div className={styles.page}>
     <div className={styles.container}>
-      <nav className={styles.nav} aria-label="Primary navigation">
-        <Link href="/" className={styles.brand}><span className={styles.brandMark}>T</span><span className={styles.brandText}><strong>THREATTRACE</strong><small>EVIDENCE-FIRST SECURITY</small></span></Link>
-        <div className={styles.navLinks}><Link href="#capabilities">Capabilities</Link><Link href="/safety-guides">Safety guides</Link></div>
-        <div className={styles.navActions}><Link href="/login" className={styles.login}>Sign in</Link><Link href="/register" className={styles.register}>Create account</Link></div>
-      </nav>
+      <HomeNavigation />
       <main>
         <section className={styles.hero}><div><p className={styles.eyebrow}>Email investigation workspace</p><h1 className={styles.heroTitle}>Turn inbox doubt into <em>clear evidence.</em></h1><p className={styles.heroCopy}>ThreatTrace brings mailbox connections, deterministic forensics, reputation intelligence, and AI-assisted context into one calm workflow for suspicious email.</p><div className={styles.heroActions}><Link href="/register" className={styles.primaryAction}>Create your workspace</Link><Link href="/analyze/upload" className={styles.secondaryAction}>Analyze an .eml</Link></div><p className={styles.heroNote}>GMAIL · OUTLOOK · EML / PRIVATE SESSION WORKSPACE</p></div><div className={styles.preview} aria-label="Investigation report preview"><div className={styles.previewTop}><span className={styles.previewLabel}>LIVE INVESTIGATION / TT-0428</span><span className={styles.previewLive}>EVIDENCE READY</span></div><div className={styles.previewBody}><div className={styles.mailMeta}><small>MESSAGE SIGNALS</small><h2>Account security notice</h2><p>security-alert@external-domain.example</p></div><div className={styles.score}><div className={styles.scoreInner}><strong>72</strong><span>RISK / 100</span></div></div><div className={styles.signalList}><div className={styles.signal}><span className={styles.signalMark}>01</span><span><strong>Authentication</strong> · sender evidence needs review</span></div><div className={styles.signal}><span className={styles.signalMark}>02</span><span><strong>Mail route</strong> · origin infrastructure reconstructed</span></div><div className={styles.signal}><span className={styles.signalMark}>03</span><span><strong>URL intelligence</strong> · reputation checks attached</span></div><div className={styles.signal}><span className={styles.signalMark}>04</span><span><strong>ML calibration</strong> · supporting context available</span></div></div></div><div className={styles.previewFooter}><span>DETERMINISTIC SCORE + PROVIDER EVIDENCE</span><span>OPEN REPORT →</span></div></div></section>
         <section className={styles.capabilities} id="capabilities"><div className={styles.sectionHead}><div><p className={styles.eyebrow}>One investigation surface</p><h2>Every signal has a place in the story.</h2></div><p>Start with the message. Follow the evidence through identity, infrastructure, reputation, and model-assisted context.</p></div><div className={styles.capabilityGrid}>{capabilities.map((capability) => <article className={styles.capability} key={capability.index}><span className={styles.capabilityIndex}>{capability.index}</span><h3>{capability.title}</h3><p>{capability.text}</p></article>)}</div></section>

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import type { NormalizedEmail } from "../types/email.js";
 
-const emailSchema = new mongoose.Schema<NormalizedEmail & { userId?: string; gmailMessageId?: string; outlookMessageId?: string; cloudinary?: { publicId: string; secureUrl: string; resourceType: string } }>({
+const emailSchema = new mongoose.Schema<NormalizedEmail & { userId?: string; gmailMessageId?: string; outlookMessageId?: string; cloudinary?: { publicId: string; secureUrl: string; resourceType: string }; createdAt?: Date; updatedAt?: Date }>({
   userId: String,
   gmailMessageId: String,
   outlookMessageId: String,

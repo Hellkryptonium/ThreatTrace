@@ -1,0 +1,7 @@
+.nav { display: flex; align-items: center; justify-content: space-between; padding: 24px 0; }
+.brand { display: inline-flex; align-items: center; gap: 11px; color: #182423; text-decoration: none; }
+.brandMark { display: grid; place-items: center; width: 34px; height: 34px; background: #18322f; color: #b7e6d8; font: 700 16px Georgia, serif; }
+.brandText { display: flex; flex-direction: column; gap: 2px; }.brandText strong { font: 700 14px "Trebuchet MS", sans-serif; letter-spacing: .14em; }.brandText small { color: #71817d; font: 9px Consolas, monospace; letter-spacing: .1em; }
+.navLinks { display: flex; align-items: center; gap: 28px; }.navLinks a, .login { color: #61716d; font-size: 12px; text-decoration: none; }.navLinks a:hover, .login:hover { color: #087f78; }
+.navActions, .loggedIn { display: flex; align-items: center; gap: 16px; }.login { color: #087f78; }.register, .workspace { padding: 10px 15px; background: #18322f; color: #fff; font-size: 12px; font-weight: 700; text-decoration: none; }.workspace { background: #087f78; }
+@media (max-width: 620px) { .navLinks { display: none; }.navActions { gap: 10px; }.login { display: none; }.loggedIn { gap: 8px; }.workspace { padding: 9px 10px; font-size: 11px; } }
