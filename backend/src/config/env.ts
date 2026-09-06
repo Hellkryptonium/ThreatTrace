@@ -15,6 +15,8 @@ const envSchema = z.object({
   VIRUSTOTAL_API_KEY: z.string().optional(),
   URLSCAN_API_KEY: z.string().optional(),
   ABUSEIPDB_API_KEY: z.string().optional(),
+  CLAMAV_HOST: z.string().optional(),
+  CLAMAV_PORT: z.coerce.number().int().positive().optional(),
   ML_SERVICE_URL: z.string().url().default("http://127.0.0.1:8001"),
   ML_SERVICE_TIMEOUT_MS: z.coerce.number().int().positive().default(2500),
   MICROSOFT_CLIENT_ID: z.string().min(1),
