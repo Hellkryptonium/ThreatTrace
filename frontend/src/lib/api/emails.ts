@@ -42,6 +42,33 @@ export interface RelayHop {
   ipAddresses: string[];
 }
 
+export interface IpReputation {
+  ip: string;
+  source: "AbuseIPDB";
+  abuseConfidenceScore: number;
+  totalReports: number;
+  isWhitelisted: boolean;
+  isp?: string;
+  usageType?: string;
+  countryCode?: string;
+  domain?: string;
+  lastReportedAt?: string;
+  permalink?: string;
+}
+
+export interface IpRdap {
+  networkName?: string;
+  handle?: string;
+  startAddress?: string;
+  endAddress?: string;
+  registrant?: string;
+  abuseContact?: string;
+  country?: string;
+  registered?: string;
+  lastChanged?: string;
+  permalink?: string;
+}
+
 export interface IpEnrichment {
   ip: string;
   country?: string;
@@ -54,15 +81,42 @@ export interface IpEnrichment {
   asn?: string;
   source?: "ipwho.is";
   retrievedAt?: string;
+  rdap?: IpRdap;
+  reputation?: IpReputation;
+}
+
+export interface DomainEnrichment {
+  domain: string;
+  dns: { addresses: string[]; mx: string[] };
+  rdap?: { registrar?: string; created?: string; expires?: string; status?: string[]; permalink?: string };
+}
+
+export interface UrlEnrichment {
+  url: string;
+  source: string;
+  verdict?: string;
+  malicious?: number;
+  suspicious?: number;
+  permalink?: string;
+}
+
+export interface EnrichmentProviderStatus {
+  configured: boolean;
+  checked: number;
+  succeeded: number;
+  failed: number;
+  message?: string;
 }
 
 export interface EnrichmentResult {
-  domains: { domain: string; dns: { addresses: string[]; mx: string[] }; rdap?: { registrar?: string; created?: string; expires?: string; status?: string[] } }[];
+  domains: DomainEnrichment[];
   ips: IpEnrichment[];
-  urls: { url: string; source: string; verdict?: string; malicious?: number; suspicious?: number; permalink?: string }[];
+  urls: UrlEnrichment[];
   providers?: {
-    virusTotal?: { configured: boolean; checked: number; succeeded: number; failed: number; message?: string };
-    urlScan?: { configured: boolean; checked: number; succeeded: number; failed: number; message?: string };
+    virusTotal?: EnrichmentProviderStatus;
+    urlScan?: EnrichmentProviderStatus;
+    abuseIpDb?: EnrichmentProviderStatus;
+    rdap?: EnrichmentProviderStatus;
   };
 }
 

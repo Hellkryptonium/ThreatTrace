@@ -14,6 +14,7 @@ const envSchema = z.object({
   GMAIL_TOKEN_ENCRYPTION_KEY: z.string().min(32).default(process.env.SESSION_SECRET ?? ""),
   VIRUSTOTAL_API_KEY: z.string().optional(),
   URLSCAN_API_KEY: z.string().optional(),
+  ABUSEIPDB_API_KEY: z.string().optional(),
   ML_SERVICE_URL: z.string().url().default("http://127.0.0.1:8001"),
   ML_SERVICE_TIMEOUT_MS: z.coerce.number().int().positive().default(2500),
   MICROSOFT_CLIENT_ID: z.string().min(1),

@@ -136,6 +136,8 @@ export interface EnrichmentResult {
   providers?: {
     virusTotal?: EnrichmentProviderStatus;
     urlScan?: EnrichmentProviderStatus;
+    abuseIpDb?: EnrichmentProviderStatus;
+    rdap?: EnrichmentProviderStatus;
   };
   completedAt: string;
 }
@@ -146,12 +148,40 @@ export interface EnrichmentProviderStatus {
   succeeded: number;
   failed: number;
   message?: string;
+  status?: "success" | "no_result" | "unauthorized" | "rate_limited" | "timeout" | "api_error";
 }
 
 export interface DomainEnrichment {
   domain: string;
   dns: { addresses: string[]; mx: string[] };
-  rdap?: { registrar?: string; created?: string; expires?: string; status?: string[] };
+  rdap?: { registrar?: string; created?: string; expires?: string; status?: string[]; permalink?: string };
+}
+
+export interface IpReputation {
+  ip: string;
+  source: "AbuseIPDB";
+  abuseConfidenceScore: number;
+  totalReports: number;
+  isWhitelisted: boolean;
+  isp?: string;
+  usageType?: string;
+  countryCode?: string;
+  domain?: string;
+  lastReportedAt?: string;
+  permalink?: string;
+}
+
+export interface IpRdap {
+  networkName?: string;
+  handle?: string;
+  startAddress?: string;
+  endAddress?: string;
+  registrant?: string;
+  abuseContact?: string;
+  country?: string;
+  registered?: string;
+  lastChanged?: string;
+  permalink?: string;
 }
 
 export interface IpEnrichment {
@@ -166,6 +196,8 @@ export interface IpEnrichment {
   asn?: string;
   source?: "ipwho.is";
   retrievedAt?: string;
+  rdap?: IpRdap;
+  reputation?: IpReputation;
 }
 
 export interface UrlReputation {
