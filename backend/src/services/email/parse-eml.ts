@@ -1,7 +1,7 @@
 import { simpleParser } from "mailparser";
 import type { AddressObject, EmailAddress } from "mailparser";
 import crypto from "node:crypto";
-import type { NormalizedEmail } from "../../types/email.js";
+import type { NormalizedEmail, RawAttachment } from "../../types/email.js";
 
 const urlPattern = /https?:\/\/[^\s<>"']+/gi;
 const forwardedPattern = /(^|\n)\s*-{2,}\s*forwarded message\s*-{2,}/i;
@@ -49,6 +49,18 @@ export async function parseEml(buffer: Buffer): Promise<NormalizedEmail> {
       size: attachment.size,
       sha256: crypto.createHash("sha256").update(attachment.content).digest("hex"),
     })),
+    rawAttachments: parsed.attachments.map((attachment) => {
+      const content = attachment.content;
+      return {
+        filename: attachment.filename ?? "attachment",
+        contentType: attachment.contentType,
+        size: attachment.size,
+        content,
+        sha256: crypto.createHash("sha256").update(content).digest("hex"),
+        sha1: crypto.createHash("sha1").update(content).digest("hex"),
+        md5: crypto.createHash("md5").update(content).digest("hex"),
+      };
+    }),
     replyTo: parsed.replyTo?.value[0]?.address,
     returnPath: headerValue(parsed.headers.get("return-path")),
     forwarded: forwardedPattern.test(parsed.text ?? ""),

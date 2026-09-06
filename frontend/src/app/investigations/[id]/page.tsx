@@ -6,7 +6,7 @@ import { apiRequest } from "@/lib/api/client";
 import { getCurrentUser, type CurrentUser } from "@/lib/api/auth";
 import { AppHeader } from "@/components/app-header";
 import styles from "./investigation.module.css";
-import type { AnalystVerdict, EnrichmentResult, Finding, MlAssistance, RelayHop, ScoreExplanation, ThreatClassification, UrlIntelligence } from "@/lib/api/emails";
+import type { AnalystVerdict, AttachmentPayloadAnalysis, EnrichmentResult, Finding, MlAssistance, RelayHop, ScoreExplanation, ThreatClassification, UrlIntelligence } from "@/lib/api/emails";
 import { RouteMap, type RouteMapPoint } from "@/components/investigation/route-map";
 
 interface Investigation {
@@ -26,6 +26,7 @@ interface Investigation {
     classification?: ThreatClassification;
     entities?: { emails: string[]; domains: string[]; urls: string[]; ips: string[]; attachments: string[] };
     mlAssistance?: MlAssistance;
+    payloadAnalysis?: AttachmentPayloadAnalysis[];
   };
   emailId: {
     sender: { email: string };
@@ -35,7 +36,7 @@ interface Investigation {
   };
 }
 
-type ReportSection = "findings" | "score" | "authentication" | "route" | "infrastructure" | "urls";
+type ReportSection = "findings" | "score" | "authentication" | "route" | "infrastructure" | "urls" | "payloads";
 
 function routeMapPoints(relayPath: RelayHop[], ipResults: NonNullable<EnrichmentResult>["ips"], probableOriginIp?: string): RouteMapPoint[] {
   const locations = new Map(ipResults.filter((item) => Number.isFinite(item.latitude) && Number.isFinite(item.longitude)).map((item) => [item.ip, item]));
@@ -88,6 +89,7 @@ export default function InvestigationPage() {
   const classification = analysis.classification;
   const entities = analysis.entities;
   const ml = analysis.mlAssistance;
+  const payloads = analysis.payloadAnalysis ?? [];
   const authentication = analysis.authentication ?? { spf: undefined, dkim: undefined, dmarc: undefined };
   const mapPoints = routeMapPoints(relayPath, enrichment?.ips ?? [], analysis.probableOriginIp);
   const urlGroups = [...urlIntelligence.reduce((groups, item) => {
@@ -122,7 +124,7 @@ export default function InvestigationPage() {
         </div>
       </section>
       <EvidenceGraph sender={email.sender.email} entities={entities} relayPath={relayPath} />
-      <nav className={styles.reportNav} aria-label="Report sections"><button className={openSection === "findings" ? styles.active : ""} onClick={() => openReportSection("findings")}>Findings</button><button className={openSection === "score" ? styles.active : ""} onClick={() => openReportSection("score")}>Score logic</button><button className={openSection === "authentication" ? styles.active : ""} onClick={() => openReportSection("authentication")}>Authentication</button><button className={openSection === "route" ? styles.active : ""} onClick={() => openReportSection("route")}>Mail route</button><button className={openSection === "infrastructure" ? styles.active : ""} onClick={() => openReportSection("infrastructure")}>Infrastructure</button><button className={openSection === "urls" ? styles.active : ""} onClick={() => openReportSection("urls")}>URLs</button></nav>
+      <nav className={styles.reportNav} aria-label="Report sections"><button className={openSection === "findings" ? styles.active : ""} onClick={() => openReportSection("findings")}>Findings</button><button className={openSection === "score" ? styles.active : ""} onClick={() => openReportSection("score")}>Score logic</button><button className={openSection === "authentication" ? styles.active : ""} onClick={() => openReportSection("authentication")}>Authentication</button><button className={openSection === "route" ? styles.active : ""} onClick={() => openReportSection("route")}>Mail route</button><button className={openSection === "infrastructure" ? styles.active : ""} onClick={() => openReportSection("infrastructure")}>Infrastructure</button><button className={openSection === "urls" ? styles.active : ""} onClick={() => openReportSection("urls")}>URLs</button><button className={openSection === "payloads" ? styles.active : ""} onClick={() => openReportSection("payloads")}>Payload Analysis</button></nav>
       <section className={styles.reportWorkspace}>
         <div className={styles.workspaceScroll}>
           {openSection === "findings" && <div className={styles.workspaceView}><section className={styles.workspaceCard} id="findings"><h2>Primary findings</h2>
@@ -144,6 +146,81 @@ export default function InvestigationPage() {
           {openSection === "route" && <div className={styles.workspaceView}><section className={styles.workspaceCard}><h2>Mail route intelligence</h2>{analysis.probableOriginIp ? <p className={styles.origin}><strong>{analysis.probableOriginIp}</strong><span>{email.sender.email.endsWith("@gmail.com") ? "Gmail relay infrastructure observed" : "Earliest public relay IP observed"}</span></p> : <p className="muted">No public origin IP could be established.</p>}<RouteMap points={mapPoints} />{relayPath.map((hop) => <div className={styles.relayHop} key={hop.hop}><span>HOP {hop.hop}</span><code>{hop.ipAddresses.join(", ") || "No IP address"}</code></div>)}<p className={styles.routeNote}>Relay data shows infrastructure reported by message headers. It does not prove a sender&apos;s physical location or identity.</p></section></div>}
           {openSection === "infrastructure" && <div className={styles.workspaceView}><section className={styles.workspaceCard}><h2>Infrastructure enrichment</h2>{enrichment ? <><p className={styles.enrichmentNote}>Best-effort public lookups. Results are contextual evidence, not attribution.</p>{enrichment.providers && <div className={styles.providerStatus}>{([['VirusTotal', enrichment.providers.virusTotal, 'URL'], ['URLScan', enrichment.providers.urlScan, 'URL'], ['AbuseIPDB', enrichment.providers.abuseIpDb, 'IP'], ['RDAP (Registration)', enrichment.providers.rdap, 'Lookup']] as const).map(([name, provider, unit]) => provider && <div className={styles.providerStatusCard} key={name}><strong>{name}</strong><span>{provider.configured ? `${provider.succeeded} result${provider.succeeded === 1 ? '' : 's'} from ${provider.checked} ${unit}${provider.checked === 1 ? '' : 's'}` : 'API key not configured'}</span>{provider.message && <span>{provider.message}</span>}</div>)}</div>}{enrichment.ips.map((item) => <div className={styles.enrichmentBlock} key={item.ip}><strong>{item.ip}</strong><span>{[item.city, item.region, item.country || item.rdap?.country].filter(Boolean).join(", ") || "Approximate network location unavailable"}</span><span>{item.isp || item.organization || "Network unavailable"}{item.asn ? ` · ${item.asn}` : ""}</span>{item.rdap && <><span>RDAP Network: {item.rdap.networkName || "Unknown"}{item.rdap.handle ? ` (${item.rdap.handle})` : ""}</span>{item.rdap.startAddress && item.rdap.endAddress && <span>Netblock: {item.rdap.startAddress} – {item.rdap.endAddress}</span>}{item.rdap.registrant && <span>Registrant: {item.rdap.registrant}</span>}{item.rdap.abuseContact && <span>Abuse contact: <a href={`mailto:${item.rdap.abuseContact}`}>{item.rdap.abuseContact}</a></span>}{(item.rdap.registered || item.rdap.lastChanged) && <span>{item.rdap.registered ? `Registered: ${item.rdap.registered.slice(0, 10)}` : ""}{item.rdap.registered && item.rdap.lastChanged ? " · " : ""}{item.rdap.lastChanged ? `Updated: ${item.rdap.lastChanged.slice(0, 10)}` : ""}</span>}<a className={styles.providerLink} href={item.rdap.permalink || `https://rdap.org/ip/${encodeURIComponent(item.ip)}`} target="_blank" rel="noreferrer">View RDAP IP record</a></>}{item.reputation && <><span style={{ color: item.reputation.abuseConfidenceScore <= 25 ? "var(--color-success, #22c55e)" : item.reputation.abuseConfidenceScore <= 75 ? "var(--color-warning, #eab308)" : "var(--color-danger, #ef4444)" }}>AbuseIPDB: {item.reputation.abuseConfidenceScore}% confidence · {item.reputation.totalReports} report{item.reputation.totalReports === 1 ? "" : "s"}{item.reputation.isWhitelisted ? " · Whitelisted" : ""}</span>{item.reputation.usageType && <span>Usage: {item.reputation.usageType}</span>}<a className={styles.providerLink} href={item.reputation.permalink} target="_blank" rel="noreferrer">View AbuseIPDB report</a></>}</div>)}{enrichment.domains.map((item) => <div className={styles.enrichmentBlock} key={item.domain}><strong>{item.domain}</strong><span>DNS: {item.dns.addresses.join(", ") || "No A record"}</span><span>MX: {item.dns.mx.join(", ") || "No MX record"}</span><span>RDAP Registrar: {item.rdap?.registrar || "Unavailable"}</span>{(item.rdap?.created || item.rdap?.expires) && <span>{item.rdap?.created ? `Created: ${item.rdap.created.slice(0, 10)}` : ""}{item.rdap?.created && item.rdap?.expires ? " · " : ""}{item.rdap?.expires ? `Expires: ${item.rdap.expires.slice(0, 10)}` : ""}</span>}<a className={styles.providerLink} href={item.rdap?.permalink || `https://rdap.org/domain/${encodeURIComponent(item.domain)}`} target="_blank" rel="noreferrer">View RDAP domain record</a></div>)}{enrichment.urls.map((item) => <div className={styles.enrichmentBlock} key={`${item.source}-${item.url}`}><strong>{item.source}</strong><span>{item.verdict || `Malicious: ${item.malicious ?? 0} · Suspicious: ${item.suspicious ?? 0}`}</span><a className={styles.providerLink} href={item.permalink} target="_blank" rel="noreferrer">View provider report</a></div>)}</> : <p className="muted">Enrichment was not available for this analysis.</p>}</section></div>}
           {openSection === "urls" && <div className={styles.workspaceView}><section className={styles.workspaceCard}><h2>URL intelligence</h2>{urlGroups.map((item) => <div className={styles.urlItem} key={`${item.category}-${item.domain}`}><span>{item.category.replaceAll("_", " ")} · {item.domain} · {item.urls.length} link{item.urls.length === 1 ? "" : "s"}</span><code>{item.category === "DIRECT" ? `${item.domain} (destination link)` : item.decodedTarget?.startsWith("http") ? item.decodedTarget : "Destination unavailable (encoded or obfuscated payload)"}</code><details><summary>View raw URL{item.urls.length === 1 ? "" : "s"}</summary>{item.urls.map((url) => <code key={url}>{url}</code>)}</details></div>)}<h2>Attachments</h2>{email.attachments.map((attachment) => <p className={styles.attachment} key={attachment.sha256}>{attachment.filename}<br /><code>{attachment.sha256}</code></p>)}</section></div>}
+          {openSection === "payloads" && <div className={styles.workspaceView}><section className={styles.workspaceCard}><h2>Payload Analysis</h2>
+            {payloads.length === 0 ? <p className="muted">No attachments were found in this email, or payload analysis data is unavailable.</p> : <>
+              <div className={styles.payloadSummary}>
+                <span>{payloads.length} attachment{payloads.length === 1 ? "" : "s"} analyzed</span>
+                {payloads.filter((p) => p.verdict === "MALICIOUS").length > 0 && <span className={styles.payloadCountMalicious}>{payloads.filter((p) => p.verdict === "MALICIOUS").length} Malicious</span>}
+                {payloads.filter((p) => p.verdict === "SUSPICIOUS").length > 0 && <span className={styles.payloadCountSuspicious}>{payloads.filter((p) => p.verdict === "SUSPICIOUS").length} Suspicious</span>}
+                {payloads.filter((p) => p.verdict === "NO_THREAT_FOUND").length > 0 && <span className={styles.payloadCountClean}>{payloads.filter((p) => p.verdict === "NO_THREAT_FOUND").length} No Threat Found</span>}
+                {payloads.filter((p) => p.verdict === "ANALYSIS_ERROR").length > 0 && <span className={styles.payloadCountError}>{payloads.filter((p) => p.verdict === "ANALYSIS_ERROR").length} Error</span>}
+              </div>
+              {payloads.map((payload) => <article className={styles.payloadCard} key={payload.sha256}>
+                <div className={styles.payloadHeader}>
+                  <div>
+                    <h3>{payload.filename}</h3>
+                    <span className={styles.payloadMeta}>{payload.detectedContentType} · {(payload.size / 1024).toFixed(1)} KB · {payload.extension || "no ext"}</span>
+                    {payload.extensionMismatch && <span className={styles.payloadWarning}>⚠ Extension mismatch: declared as {payload.declaredContentType}</span>}
+                    {payload.doubleExtension && <span className={styles.payloadWarning}>⚠ Double extension detected</span>}
+                  </div>
+                  <span className={`${styles.payloadVerdict} ${styles[`verdict${payload.verdict.replace(/_/g, "")}`]}`}>{payload.verdict.replace(/_/g, " ")}</span>
+                </div>
+                <div className={styles.payloadHashes}>
+                  <p><span>SHA-256</span><code>{payload.sha256}</code></p>
+                  <p><span>SHA-1</span><code>{payload.sha1}</code></p>
+                  <p><span>MD5</span><code>{payload.md5}</code></p>
+                </div>
+                <div className={styles.payloadEngines}>
+                  <h4>Multi-Engine Results</h4>
+                  <div className={styles.payloadEngineGrid}>
+                    <div className={styles.payloadEngineCard}>
+                      <strong>VirusTotal</strong>
+                      {payload.virusTotal?.checked ? (payload.virusTotal.found ? <span style={{ color: payload.virusTotal.malicious > 0 ? "var(--color-danger, #ef4444)" : "var(--color-success, #22c55e)" }}>{payload.virusTotal.malicious} malicious · {payload.virusTotal.suspicious} suspicious · {payload.virusTotal.harmless} clean</span> : <span className="muted">Hash not found in VirusTotal</span>) : <span className="muted">{payload.virusTotal?.error || "Not checked"}</span>}
+                      {payload.virusTotal?.permalink && <a className={styles.providerLink} href={payload.virusTotal.permalink} target="_blank" rel="noreferrer">View VirusTotal report</a>}
+                    </div>
+                    <div className={styles.payloadEngineCard}>
+                      <strong>ClamAV</strong>
+                      {payload.clamAv?.available ? <span style={{ color: payload.clamAv.status === "infected" ? "var(--color-danger, #ef4444)" : payload.clamAv.status === "clean" ? "var(--color-success, #22c55e)" : "var(--color-warning, #eab308)" }}>{payload.clamAv.status === "clean" ? "Clean" : payload.clamAv.status === "infected" ? `Infected: ${payload.clamAv.virus}` : `Error: ${payload.clamAv.error || "Unknown"}`}</span> : <span className="muted">ClamAV unavailable</span>}
+                    </div>
+                    <div className={styles.payloadEngineCard}>
+                      <strong>YARA Rules</strong>
+                      {payload.yaraMatches.length > 0 ? payload.yaraMatches.map((match) => <span key={match.rule} style={{ color: match.severity === "CRITICAL" ? "var(--color-danger, #ef4444)" : match.severity === "HIGH" ? "var(--color-warning, #eab308)" : "var(--color-info, #3b82f6)" }}>{match.rule}: {match.description}{match.matchedStrings?.length ? ` (${match.matchedStrings.join(", ")})` : ""}</span>) : <span className="muted">No pattern matches</span>}
+                    </div>
+                  </div>
+                </div>
+                {payload.indicators.length > 0 && <div className={styles.payloadIndicators}>
+                  <h4>Static Analysis Findings</h4>
+                  {payload.indicators.map((ind, i) => <p key={`${ind.rule}-${i}`}><span className={`${styles.severity} ${styles[ind.severity.toLowerCase()]}`}>{ind.severity}</span> {ind.description}{ind.detail ? ` — ${ind.detail}` : ""}</p>)}
+                </div>}
+                {payload.metadata?.pdf && <div className={styles.payloadMetadata}>
+                  <h4>PDF Analysis</h4>
+                  {payload.metadata.pdf.title && <p>Title: {payload.metadata.pdf.title}</p>}
+                  {payload.metadata.pdf.author && <p>Author: {payload.metadata.pdf.author}</p>}
+                  <p>JavaScript: {payload.metadata.pdf.hasJavaScript ? "⚠ Yes" : "No"} · Launch: {payload.metadata.pdf.hasLaunchAction ? "⚠ Yes" : "No"} · Auto-action: {payload.metadata.pdf.hasAutoAction ? "⚠ Yes" : "No"} · Embedded files: {payload.metadata.pdf.hasEmbeddedFiles ? "⚠ Yes" : "No"} · Forms: {payload.metadata.pdf.formCount}</p>
+                  {payload.metadata.pdf.suspiciousFilters.length > 0 && <p>Suspicious filters: {payload.metadata.pdf.suspiciousFilters.join(", ")}</p>}
+                </div>}
+                {payload.metadata?.office && <div className={styles.payloadMetadata}>
+                  <h4>Office Document Analysis</h4>
+                  <p>Macros: {payload.metadata.office.hasMacros ? `⚠ Yes${payload.metadata.office.macroType ? ` (${payload.metadata.office.macroType})` : ""}` : "No"} · External relationships: {payload.metadata.office.hasExternalRelationships ? "⚠ Yes" : "No"} · OLE objects: {payload.metadata.office.hasOleObjects ? "⚠ Yes" : "No"} · DDE links: {payload.metadata.office.hasDdeLinks ? "⚠ Yes" : "No"}</p>
+                  {payload.metadata.office.externalUrls.length > 0 && <details><summary>{payload.metadata.office.externalUrls.length} external URL{payload.metadata.office.externalUrls.length === 1 ? "" : "s"}</summary>{payload.metadata.office.externalUrls.map((url) => <code key={url}>{url}</code>)}</details>}
+                </div>}
+                {payload.metadata?.archive && <div className={styles.payloadMetadata}>
+                  <h4>Archive Contents</h4>
+                  <p>{payload.metadata.archive.totalEntries} file{payload.metadata.archive.totalEntries === 1 ? "" : "s"} · {(payload.metadata.archive.totalUncompressedSize / 1024).toFixed(1)} KB uncompressed · Max ratio: {payload.metadata.archive.maxCompressionRatio.toFixed(1)}:1{payload.metadata.archive.hasPathTraversal ? " · ⚠ Path traversal" : ""}</p>
+                  {payload.metadata.archive.entries.length > 0 && <details><summary>View archive entries</summary>{payload.metadata.archive.entries.map((entry) => <p key={entry.filename}>{entry.filename} — {(entry.uncompressedSize / 1024).toFixed(1)} KB{entry.isEncrypted ? " 🔒" : ""}{entry.isExecutable ? " ⚠ executable" : ""}{entry.isArchive ? " 📦 nested" : ""}</p>)}</details>}
+                </div>}
+                {payload.metadata?.image && <div className={styles.payloadMetadata}>
+                  <h4>Image Analysis</h4>
+                  <p>{payload.metadata.image.format?.toUpperCase() || "Unknown"}{payload.metadata.image.width && payload.metadata.image.height ? ` · ${payload.metadata.image.width}×${payload.metadata.image.height}` : ""}{payload.metadata.image.hasScript ? " · ⚠ Script detected" : ""}{payload.metadata.image.hasAppendedData ? " · ⚠ Appended data" : ""}</p>
+                </div>}
+                {payload.extractedUrls.length > 0 && <div className={styles.payloadMetadata}>
+                  <h4>Extracted URLs</h4>
+                  <details><summary>{payload.extractedUrls.length} URL{payload.extractedUrls.length === 1 ? "" : "s"} extracted</summary>{payload.extractedUrls.map((url) => <code key={url}>{url}</code>)}</details>
+                </div>}
+                <p className={styles.payloadTimestamp}>Analyzed at {new Date(payload.analyzedAt).toLocaleString()}</p>
+              </article>)}
+            </>}
+          </section></div>}
         </div>
       </section>
     </main>

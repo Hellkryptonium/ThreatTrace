@@ -16,6 +16,13 @@ describe("parseEml", () => {
     expect(email.urls).toEqual(["http://192.0.2.10/verify", "https://bit.ly/fixture-link"]);
     expect(email.attachments[0]).toMatchObject({ filename: "invoice.txt", size: 28 });
     expect(email.attachments[0]?.sha256).toMatch(/^[a-f0-9]{64}$/);
+    expect(email.rawAttachments?.[0]).toMatchObject({
+      filename: "invoice.txt",
+      size: 28,
+    });
+    expect(email.rawAttachments?.[0]?.content).toBeInstanceOf(Buffer);
+    expect(email.rawAttachments?.[0]?.sha1).toMatch(/^[a-f0-9]{40}$/);
+    expect(email.rawAttachments?.[0]?.md5).toMatch(/^[a-f0-9]{32}$/);
   });
 
   it("preserves headers from a forwarded body", async () => {

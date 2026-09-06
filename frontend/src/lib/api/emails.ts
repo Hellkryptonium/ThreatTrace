@@ -137,3 +137,74 @@ export interface MlAssistance {
   latencyMs?: number;
   reason?: string;
 }
+
+// ───── Payload Analysis Types ─────
+
+export type PayloadVerdict = "MALICIOUS" | "SUSPICIOUS" | "NO_THREAT_FOUND" | "NOT_ANALYZED" | "ANALYSIS_ERROR";
+
+export interface PayloadIndicator {
+  rule: string;
+  severity: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW" | "INFO";
+  description: string;
+  detail?: string;
+}
+
+export interface VirusTotalFileResult {
+  checked: boolean;
+  found: boolean;
+  malicious: number;
+  suspicious: number;
+  undetected: number;
+  harmless: number;
+  permalink?: string;
+  error?: string;
+}
+
+export interface ClamAvResult {
+  available: boolean;
+  status: "clean" | "infected" | "error" | "unavailable";
+  virus?: string;
+  error?: string;
+}
+
+export interface YaraMatch {
+  rule: string;
+  description: string;
+  severity: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
+  matchedStrings?: string[];
+}
+
+export interface ArchiveEntry {
+  filename: string;
+  compressedSize: number;
+  uncompressedSize: number;
+  isEncrypted: boolean;
+  isExecutable: boolean;
+  isArchive: boolean;
+}
+
+export interface AttachmentPayloadAnalysis {
+  filename: string;
+  declaredContentType: string;
+  detectedContentType: string;
+  extension: string;
+  size: number;
+  sha256: string;
+  sha1: string;
+  md5: string;
+  verdict: PayloadVerdict;
+  indicators: PayloadIndicator[];
+  extractedUrls: string[];
+  virusTotal?: VirusTotalFileResult;
+  clamAv?: ClamAvResult;
+  yaraMatches: YaraMatch[];
+  metadata?: {
+    pdf?: { title?: string; author?: string; producer?: string; creationDate?: string; hasJavaScript: boolean; hasLaunchAction: boolean; hasAutoAction: boolean; hasEmbeddedFiles: boolean; formCount: number; suspiciousFilters: string[] };
+    office?: { hasMacros: boolean; macroType?: string; hasExternalRelationships: boolean; externalUrls: string[]; hasOleObjects: boolean; hasDdeLinks: boolean; documentTitle?: string; documentAuthor?: string };
+    archive?: { entries: ArchiveEntry[]; totalEntries: number; totalUncompressedSize: number; maxCompressionRatio: number; hasPathTraversal: boolean; nestingDepth: number };
+    image?: { width?: number; height?: number; format?: string; hasScript?: boolean; hasAppendedData?: boolean };
+  };
+  extensionMismatch: boolean;
+  doubleExtension: boolean;
+  analyzedAt: string;
+}
